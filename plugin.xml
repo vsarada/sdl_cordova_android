@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	id="com.smartdevicelink.cordova" version="1.0.0" >	
+	
+	<name>SdlCordova</name>	
+	<description>SmartDeviceLink Cordova Plugin</description>
+	<license>Apache 2.0</license>
+	<keywords>smartdevicelink,cordova</keywords>
+	
+	<repo>https://github.com/smartdevicelink/sdl_cordova_android</repo>
+	<issue>https://github.com/smartdevicelink/sdl_cordova_android</issue> 
+	<js-module name="SdlCordova" src="www/SdlCordova.js">
+		<clobbers target="SdlCordova" />
+	</js-module>
+	<js-module name="SdlCordovaFactory" src="www/SdlCordovaFactory.js">
+		<clobbers target="SdlCordovaFactory" />
+	</js-module>
+	<!-- android -->
+	<platform name="android">
+		<config-file parent="/*" target="res/xml/config.xml">	
+			<feature name="SdlCordova">
+				<param name="android-package" value="com.smartdevicelink.cordova.SdlCordova" />
+			</feature>
+		</config-file>
+
+		<source-file src="src/android/com/smartdevicelink/cordova/rpcInfo.java" target-dir="src/com/smartdevicelink/cordova" />
+		<source-file src="src/android/com/smartdevicelink/cordova/SdlCordova.java" target-dir="src/com/smartdevicelink/cordova" />
+		<source-file src="src/android/com/smartdevicelink/cordova/artifacts/PersistentSdlData.java" target-dir="src/com/smartdevicelink/cordova/artifacts" />
+		<source-file src="src/android/com/smartdevicelink/cordova/constants/Actions.java" target-dir="src/com/smartdevicelink/cordova/constants" />
+		<source-file src="src/android/com/smartdevicelink/cordova/constants/CordovaParameters.java" target-dir="src/com/smartdevicelink/cordova/constants" />
+		<source-file src="src/android/com/smartdevicelink/cordova/constants/LogStrings.java" target-dir="src/com/smartdevicelink/cordova/constants" />
+		<source-file src="src/android/com/smartdevicelink/cordova/constants/ProxyEvents.java" target-dir="src/com/smartdevicelink/cordova/constants" />
+		<source-file src="src/android/com/smartdevicelink/cordova/utils/JSONtoJavaClassConverter.java" target-dir="src/com/smartdevicelink/cordova/utils" />
+		
+		<config-file target="AndroidManifest.xml" parent="/*">
+			<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+			<uses-permission android:name="android.permission.BLUETOOTH" />
+			<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+		</config-file>
+	</platform>
+	
+	<platform name="ios">
+		<config-file parent="/*" target="config.xml">
+			<feature name="SdlCordova">
+				<param name="ios-package" value="SdlCordova" />
+			</feature>
+		</config-file>
+        	<source-file src="src/ios/CordovaPluginSdlProxy.h" />
+        	<source-file src="src/ios/SdlCordova.h" />
+		<source-file src="src/ios/SdlCordova.m" />
+		<source-file src="src/ios/artifacts/PersistentSyncData.h" />
+		<source-file src="src/ios/artifacts/PersistentSyncData.m" />
+		<source-file src="src/ios/constants/Actions.h" />
+		<source-file src="src/ios/constants/Actions.m" />
+		<source-file src="src/ios/constants/CordovaParameters.h" />
+		<source-file src="src/ios/constants/CordovaParameters.m" />
+		<source-file src="src/ios/constants/ProxyEvents.h" />
+		<source-file src="src/ios/constants/ProxyEvents.m" />
+
+
+	</platform>
+</plugin>
