@@ -1,2 +1,4 @@
-# sdl_cordova_android
-Cordova Proxy Android Implementation
+sdl_cordova_android
+===========
+
+SmartDeviceLink Cordova Proxy Implementation

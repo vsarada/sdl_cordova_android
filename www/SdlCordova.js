@@ -47,6 +47,29 @@ var SdlCordova = {
 				"test", 
 				[resultType]);
 	},
+	
+	siphonLog: function(opts){
+		/*if(typeof msg == "string"){
+			var temp = msg;
+			msg = this.clone(SdlCordova.DefaultOptsLogMessage);
+			msg.message = temp;
+		}else{*/
+			opts = this.extend(opts, SdlCordova.defaultOptsLogMessage);				
+		//}
+		
+		var error = opts.error;
+		opts.error = function(){
+			if(typeof console == "object" && typeof console.log == "function"){
+				console.log("Redirect from Siphon Log: " + opts.message);
+				opts.success();
+			}else{
+				error("Could not log message");
+			}
+		};
+		
+		//this.executeAction(opts, SdlCordova.Names.Actions.SIPHON_LOG, [opts.message]);
+		cordova.exec(this.iProxyListenerCallback, opts.error, "SdlCordova", SdlCordova.names.SIPHON_LOG, [opts.message]);
+	},
 
 	createProxy: function(opts){
 
@@ -71,7 +94,25 @@ var SdlCordova = {
 				appId : opts.appId
 		};		
 
-		cordova.exec(this.iProxyListenerCallback, opts.fail, "SdlCordova", SdlCordova.names.ACTION_CREATE_PROXY, [params]);
+		//Jiaxi copied from old file
+		// Optional Params
+        if(opts.ngnMediaScreenAppName){ //not exist
+        	params[SdlCordova.Names.RPCFields.NGN_MEDIA_SCREEN_APP_NAME] = opts.ngnMediaScreenAppName;
+        }
+        if(opts.vrSynonyms){ //not exist
+        	params[SdlCordova.Names.RPCFields.VR_SYNONYMS] = opts.vrSynonyms;
+        }
+        if(opts.sdlMsgVersion){ //not exist
+        	params[SdlCordova.Names.RPCFields.Sdl_MSG_VERSION] = opts.sdlMsgVersion;
+        }
+       
+       if(opts.autoActivateID){ //not exist
+        	params[SdlCordova.Names.RPCFields.AUTO_ACTIVATE_ID] = opts.autoActivateID;
+       }
+       //
+
+		cordova.exec(opts.success, opts.fail, "SdlCordova", SdlCordova.names.ACTION_CREATE_PROXY, [params]);
+		//TODO cordova.exec(this.iProxyListenerCallback, opts.fail, "SdlCordova", SdlCordova.names.ACTION_CREATE_PROXY, [params]);
 	},
 	
 	checkAndUpdateProxyCallback: function(opts){
@@ -166,6 +207,9 @@ var SdlCordova = {
 			rpcRequestParams[SdlCordova.names.cmdID] = Number(opts.cmdID);
 			console.log("enters if#1");
 		}
+		if(opts.cmdIcon){
+			rpcRequestParams[SdlCordova.names.cmdIcon] = opts.cmdIcon;
+		}
 		if(opts.menuName){
 			// Build the menuParams
 			var menuParams = {};
@@ -246,6 +290,11 @@ var SdlCordova = {
 		if(opts.alertText2){
 			rpcRequestParams[SdlCordova.names.alertText2] = opts.alertText2;
 		}
+		// added
+		if(opts.alertText3){
+			rpcRequestParams[SdlCordova.names.alertText3] = opts.alertText3;
+		}
+		//
 		if(opts.duration){
 			rpcRequestParams[SdlCordova.names.duration] = Number(opts.duration);
 		}
@@ -450,18 +499,44 @@ var SdlCordova = {
 		//needs work
 		console.log("putFile function running");
 		//Builds the request params
-		rpcRequestParams = {};
+		var rpcRequestParams = {}; //modified
 		
+		//modified
+		if(opts.fileData){
+			rpcRequestParams[SdlCordova.names.fileData] = opts.fileData;
+		}
+		if(opts.fileType){
+			rpcRequestParams[SdlCordova.names.fileType] = opts.fileType;
+		}
+		if(opts.length){
+			rpcRequestParams[SdlCordova.names.length] = opts.length;
+		}
+		if(opts.offset){
+			rpcRequestParams[SdlCordova.names.offset] = opts.offset;
+		}
+		if(opts.persistentFile){
+			rpcRequestParams[SdlCordova.names.persistentFile] = opts.persistentFile;
+		}
+		if(opts.sdlFileName){
+			rpcRequestParams[SdlCordova.names.sdlFileName] = opts.sdlFileName;
+		}
+		if(opts.systemFile){
+			rpcRequestParams[SdlCordova.names.systemFile] = opts.systemFile;
+		}
+		//rpcRequestParams[SdlCordova.names.filePath] = opts.filePath;
+		
+		// added
 		//Build the request
-		rpcRequestParams[SdlCordova.names.sdlFileName] = opts.sdlFileName;
-		rpcRequestParams[SdlCordova.names.fileType] = opts.fileType;
-		rpcRequestParams[SdlCordova.names.filePath] = opts.filePath;
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_putFile;
+		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
 		
 		//Builds the message
 		var rpcMessage = {};
 		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
 		
-		return this.sendBinaryRPCRequest(opts, rpcMessage);
+		return this.sendRPCRequest(opts, rpcMessage);
 	},
 	
 	resetGlobalProperties: function(correlationId, opts){
@@ -569,6 +644,13 @@ var SdlCordova = {
 		}
 		if(opts.mainField2 === "" || opts.mainField2){
 			rpcRequestParams[SdlCordova.names.mainField2] = opts.mainField2;
+		}
+		// added
+		if(opts.mainField3 === "" || opts.mainField3){
+			rpcRequestParams[SdlCordova.names.mainField3] = opts.mainField3;
+		}
+		if(opts.mainField4 === "" || opts.mainField4){
+			rpcRequestParams[SdlCordova.names.mainField4] = opts.mainField4;
 		}
 		if(opts.alignment){
 			rpcRequestParams[SdlCordova.names.alignment] = opts.alignment;
@@ -927,6 +1009,12 @@ Choice: function(choiceId, menuName, vrCommands){
 	this[SdlCordova.names.choiceID] = choiceId;
 	this[SdlCordova.names.menuName] = menuName;
 	this[SdlCordova.names.vrCommands] = vrCommands;
+},
+
+// added 
+Image: function(value, imageType){
+	this[SdlCordova.names.value] = value;
+	this[SdlCordova.names.imageType] = imageType;
 }
 };
 
@@ -944,17 +1032,18 @@ SdlCordova.names.ACTION_GET_DISPLAY_CAPABILITIES = "getDisplayCapabilities";
 SdlCordova.names.ACTION_GET_DOES_PROXY_EXIST = "doesProxyExist";
 SdlCordova.names.ACTION_GET_HMI_DISPLAY_LANGUAGE = "getHmiDisplayLanguage";
 SdlCordova.names.ACTION_GET_HMI_ZONE_CAPABILITIES = "getHmiZoneCapabilities";
-SdlCordova.names.ACTION_GET_PERSISTENT_SYNC_DATA = "getPersistentSyncData";
+SdlCordova.names.ACTION_GET_PERSISTENT_SDL_DATA = "getPersistentSdlData";
 SdlCordova.names.ACTION_GET_PRESET_BANK_CAPABILITIES = "getPresetBankCapabilities";
 SdlCordova.names.ACTION_GET_SOFT_BUTTON_CAPABILITIES = "getSoftButtonCapabilities";
 SdlCordova.names.ACTION_GET_SPEECH_CAPABILITIES = "getSpeechCapabilities";
-SdlCordova.names.ACTION_GET_SDL_LANGUAGE = "getSdlLanguage";
-SdlCordova.names.ACTION_GET_SDL_MSG_VERSION = "getSdlMsgVersion";
+SdlCordova.names.ACTION_GET_SYNC_LANGUAGE = "getSyncLanguage";
+SdlCordova.names.ACTION_GET_SYNC_MSG_VERSION = "getSyncMsgVersion";
 SdlCordova.names.ACTION_GET_VEHICLE_TYPE = "getVehicleType";
 SdlCordova.names.ACTION_GET_VR_CAPABILITIES = "getVrCapabilities";
 SdlCordova.names.ACTION_GET_WIPRO_VERSION = "getWiproVersion";
 SdlCordova.names.ACTION_REGISTER_NEW_CALLBACK_CONTEXT = "registerNewCallbackContext";
 SdlCordova.names.ACTION_SEND_RPC_REQUEST = "sendRpcRequest";
+SdlCordova.names.SIPHON_LOG = "siphonLog"; //added
 
 // RPC Parameters
 SdlCordova.names.messageTypeRequest = "request";
@@ -974,11 +1063,18 @@ SdlCordova.names.correlationID = "correlationID";
 	
 	// AddCommand	
 	SdlCordova.names.cmdID = "cmdID";
+	SdlCordova.names.cmdIcon = "cmdIcon"; //added
 	SdlCordova.names.menuName = "menuName";
 	SdlCordova.names.parentID = "parentID";
 	SdlCordova.names.position = "position";
 	SdlCordova.names.vrCommands = "vrCommands";
 	SdlCordova.names.menuParams = "menuParams";
+	
+	// Image (added)
+	SdlCordova.names.value = "value";
+	SdlCordova.names.imageType = "imageType";
+	SdlCordova.names.imagetype_static = "STATIC";
+	SdlCordova.names.imagetype_dynamic = "DYNAMIC";
 	
 	// AddSubMenu
 	SdlCordova.names.menuID = "menuID";
@@ -989,6 +1085,7 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.ttsText = "ttsText";
 	SdlCordova.names.alertText1 = "alertText1";
 	SdlCordova.names.alertText2 = "alertText2";
+	SdlCordova.names.alertText3 = "alertText3"; //added
 	SdlCordova.names.duration = "duration";
 	SdlCordova.names.playTone = "playTone";
 	
@@ -1040,10 +1137,16 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.HELP_PROMPT = "HELPPROMPT";
 	SdlCordova.names.TIMEOUT_PROMPT = "TIMEOUTPROMPT";
 	
-	//PutFile
-	SdlCordova.names.sdlFileName = "syncFileName";
+	//PutFile modified
+	SdlCordova.names.fileData = "fileData";
 	SdlCordova.names.fileType = "fileType";
-	SdlCordova.names.filePath = "filePath";
+	SdlCordova.names.length = "length";
+	SdlCordova.names.offset = "offset";
+	SdlCordova.names.persistentFile = "persistentFile";
+	SdlCordova.names.sdlFileName = "syncFileName";
+	SdlCordova.names.systemFile = "systemFile";
+	//SdlCordova.names.filePath = "filePath";
+	
 	
 	// SetMediaClockTimer
 	SdlCordova.names.startTime = "startTime";
@@ -1059,6 +1162,8 @@ SdlCordova.names.correlationID = "correlationID";
 	// Show 	
 	SdlCordova.names.mainField1 = "mainField1";
 	SdlCordova.names.mainField2 = "mainField2";
+	SdlCordova.names.mainField3 = "mainField3"; //added
+	SdlCordova.names.mainField4 = "mainField4"; //added
 	SdlCordova.names.alignment = "alignment";
 	SdlCordova.names.alignment_left = "LEFT_ALIGNED";
 	SdlCordova.names.alignment_right = "RIGHT_ALIGNED";
@@ -1175,6 +1280,16 @@ SdlCordova.defaultOptsCreateProxy = {
 	console.log("opts.fail is called");}, 
 	isMediaApplication: true
 };
+
+//added
+SdlCordova.defaultOptsLogMessage = {
+	success: function(){}, 
+	error: function(e){
+		//do not log! would cause an infinite loop!
+	},
+	message: ""
+};
+//
 
 // Show
 var showDefaultParams = {};
