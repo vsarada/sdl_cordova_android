@@ -41,6 +41,7 @@ function AddCommand(){
 	
 	this.functionName = "addCommand";
 	this.cmdID = null;
+	this.cmdIcon = null; //added
 	this.menuName = null;
 	this.parentID = null;
 	this.position = null;
@@ -74,6 +75,11 @@ function AddCommand(){
 		this.vrCommands = arr ? SdlCordova.toArray(arr) : null;
 	};
 	
+	//added
+	this.setCmdIcon = function(cmdIcon){
+		this.cmdIcon = cmdIcon;
+	}
+	
 	this.addVrCommand = function(cmd){
 		//this.vrCommands.push(cmd);
 		if(!(this.vrCommands instanceof Array)){
@@ -102,6 +108,11 @@ function AddCommand(){
 	this.getVrCommands = function(){
 		return this.vrCommands;
 	};
+	
+	//added
+	this.getCmdIcon = function(){
+		return this.cmdIcon;
+	}
 }
 AddCommand.prototype = Object.create(RPCBase.prototype);
 factory.AddCommand = AddCommand;
@@ -158,6 +169,7 @@ function Alert(){
 	this.ttsChunks = null;
 	this.alertText1 = null;
 	this.alertText2 = null;
+	this.alertText3 = null; //added
 	this.playTone = true;
 	this.duration = null;
 	
@@ -179,9 +191,11 @@ function Alert(){
 		}		
 	};
 	
-	this.setAlertText = function(line1, line2){
+	// modified
+	this.setAlertText = function(line1, line2, line3){
 		this.alertText1 = line1;
 		this.alertText2 = line2;
+		this.alertText3 = line3;
 	};
 	
 	this.setPlayTone = function(playTone){
@@ -196,8 +210,9 @@ function Alert(){
 		return this.ttsChunks;
 	};
 	
+	// modified
 	this.getAlertText = function(){
-		return {line1: this.alertText1, line2: this.alertText2};
+		return {line1: this.alertText1, line2: this.alertText2, line3: this.alertText3};
 	};
 	
 	this.getPlayTone = function(){
@@ -601,18 +616,30 @@ function Show(){
 	this.functionName = "show";
 	this.mainField1 = null;
 	this.mainField2 = null;
+	//added
+	this.mainField3 = null;
+	this.mainField4 = null;
 	this.alignment = null;
 	this.statusBar = null;
 	this.mediaClock = null;
 	this.mediaTrack = null;
 	
-	this.setDisplayText = function(line1, line2){
-		if(line1){
+	// modified
+	this.setDisplayText = function(line1, line2, line3, line4){
+		if(line1 == "" || line1){
 			this.mainField1 = line1;
 		}
 		
-		if(line2){
+		if(line2 == "" || line2){
 			this.mainField2 = line2;
+		}
+		
+		if(line3 == "" || line3){
+			this.mainField3 = line3;
+		}
+		
+		if(line4 == "" || line4){
+			this.mainField4 = line4;
 		}
 	};
 	
@@ -653,6 +680,13 @@ function Show(){
 	};
 	this.getDisplayLine2 = function(){
 		return this.mainField2;
+	};
+	//added
+	this.getDisplayLine3 = function(){
+		return this.mainField3;
+	};
+	this.getDisplayLine3 = function(){
+		return this.mainField4;
 	};
 	this.getTextAlignment = function(){
 		return this.textAlignment;
@@ -721,6 +755,78 @@ function UnsubscribeButton(){
 }
 UnsubscribeButton.prototype = Object.create(RPCBase.prototype);
 factory.UnsubscribeButton = UnsubscribeButton;
+
+//added
+function PutFile(){
+	RPCBase.call(this);
+	
+	this.functionName = "putFile";
+	this.fileData = null;
+	this.fileType = null;
+	this.length = null;
+	this.offset = null;
+	this.persistentFile = true;
+	this.sdlFileName = null;
+	this.systemFile = true;
+	
+	this.setFileData = function(fileData){
+		this.fileData = fileData;
+	};
+	
+	this.setFileType = function(fileType){
+		this.fileType = fileType;
+	};
+	
+	this.setLength = function(length){
+		this.length = length;
+	};
+	
+	this.setOffset = function(offset){
+		this.offset = offset;
+	};
+	
+	this.setPersistentFile = function(persistentFile){
+		this.persistentFile = persistentFile;
+	};
+	
+	this.setSdlFileName = function(sdlFileName){
+		this.sdlFileName = sdlFileName;
+	};
+	
+	this.setSystemFile = function(systemFile){
+		this.systemFile = systemFile;
+	};
+	
+	this.getFileData = function(){
+		return this.fileData;
+	};
+	
+	this.getFileType = function(){
+		return this.fileType;
+	};
+	
+	this.getLength = function(){
+		return this.length;
+	};
+	
+	this.getOffset = function(){
+		return this.offset;
+	};
+	
+	this.getPersistentFile = function(){
+		return this.persistentFile;
+	};
+	
+	this.getSdlFileName = function(){
+		return this.sdlFileName;
+	};
+	
+	this.getSystemFile = function(){
+		return this.systemFile;
+	};
+}
+PutFile.prototype = Object.create(RPCBase.prototype);
+factory.PutFile = PutFile;
 
 function isValidTTSChunkType(type){
 	switch(type){
