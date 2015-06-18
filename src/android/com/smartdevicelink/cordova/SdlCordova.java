@@ -3,6 +3,8 @@ package com.smartdevicelink.cordova;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.List;
+import java.util.Arrays;
+import java.io.UnsupportedEncodingException;
 
 
 // Pre Cordova 3.0 Imports
@@ -120,6 +122,9 @@ import com.smartdevicelink.proxy.rpc.enums.SpeechCapabilities;
 import com.smartdevicelink.proxy.rpc.enums.SdlDisconnectedReason;
 import com.smartdevicelink.proxy.rpc.enums.VrCapabilities;
 import com.smartdevicelink.transport.SiphonServer;
+import com.smartdevicelink.util.DebugTool; 
+
+
 
 public class SdlCordova extends CordovaPlugin {
 
@@ -1101,12 +1106,21 @@ public class SdlCordova extends CordovaPlugin {
 						.deserializeJSONObject(rpcRequestJSON);
 						
 				//added for PutFile
-				if((String.valueOf(hash.get("FunctionName"))).equals(Names.PutFile)){
-					String temp = String.valueOf(hash.get("FileData"));
-					hash.put("FileData", Base64.decode(temp, Base64.NO_WRAP));
+				byte[] code = null;
+				Hashtable<String, Object> function = (Hashtable<String, Object>) hash.get("request"); //name, correlationId, parameters
+				if((String.valueOf(function.get("name"))).equals(Names.PutFile)){
+					Hashtable<String, Object> parameters = (Hashtable<String, Object>)function.get("parameters"); //fileType, syncFileName, fileData
+					String temp = (String)parameters.get("fileData");
+					// take out header
+					temp = temp.substring(temp.indexOf(",")+1);
+					code = Base64.decode(temp, Base64.DEFAULT);
+					//parameters.put("bulkData", Base64.decode(temp, Base64.DEFAULT));
 				}
 				
 				rpcRequest = new RPCRequest(hash);
+				if(code !=null)
+					rpcRequest.setBulkData(code);
+				
 			} catch (JSONException e) {
 				String errorString = Actions.sendRpcRequest.name()
 						+ " could not convert JSON rpcRequest to a hashtable.";
@@ -1118,6 +1132,8 @@ public class SdlCordova extends CordovaPlugin {
 				}
 
 				return;
+			}  catch (IllegalArgumentException e){
+			// to do
 			}
 
 		}
@@ -1164,6 +1180,9 @@ public class SdlCordova extends CordovaPlugin {
 											// layer. Remove when fixed.
 			Log.w(logTag,
 					"RPC Layer of the proxy threw an exception, could not persist to persistentSdlData.");
+		} catch (NullPointerException e) {
+		
+			// to do
 		}
 
 		try {

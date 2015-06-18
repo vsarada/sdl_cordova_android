@@ -765,9 +765,9 @@ function PutFile(){
 	this.fileType = null;
 	this.length = null;
 	this.offset = null;
-	this.persistentFile = true;
+	this.persistentFile = null;
 	this.sdlFileName = null;
-	this.systemFile = true;
+	this.systemFile = null;
 	
 	this.setFileData = function(fileData){
 		this.fileData = fileData;
@@ -828,6 +828,32 @@ function PutFile(){
 PutFile.prototype = Object.create(RPCBase.prototype);
 factory.PutFile = PutFile;
 
+function DeleteFile(){
+	RPCBase.call(this);
+	
+	this.functionName = "deleteFile";
+	this.sdlFileName = null;
+	
+	this.setSdlFileName = function(sdlFileName){
+		this.sdlFileName = sdlFileName;
+	};
+	
+	this.getSdlFileName = function(){
+		return this.sdlFileName;
+	};
+}
+DeleteFile.prototype = Object.create(RPCBase.prototype);
+factory.DeleteFile = DeleteFile;
+
+function ListFiles(){
+	RPCBase.call(this);
+	
+	this.functionName = "listFiles";
+}
+ListFiles.prototype = Object.create(RPCBase.prototype);
+factory.ListFiles = ListFiles;
+
+// end added
 function isValidTTSChunkType(type){
 	switch(type){
 	case SdlCordova.names.speechCapabilities_TEXT:
@@ -967,7 +993,7 @@ SdlCordova.onCreateInteractionChoiceSetResponse(proxyListener);
 SdlCordova.onDeleteCommandResponse(proxyListener);
 SdlCordova.onDeleteInteractionChoiceSetResponse(proxyListener);
 SdlCordova.onDeleteSubMenuResponse(proxyListener);
-SdlCordova.onEncodedSyncPDataResponse(proxyListener);
+SdlCordova.onEncodedSdlPDataResponse(proxyListener);
 SdlCordova.onPerformInteractionResponse(proxyListener);
 SdlCordova.onRegisterAppInterfaceResponse(proxyListener);
 SdlCordova.onSetGlobalPropertiesResponse(proxyListener);
@@ -980,7 +1006,7 @@ SdlCordova.onUnregisterAppInterfaceResponse(proxyListener);
 SdlCordova.onUnsubscribeButtonResponse(proxyListener);
 SdlCordova.onOnButtonEvent(proxyListener);
 SdlCordova.onOnButtonPress(proxyListener);
-SdlCordova.onOnEncodedSyncPData(proxyListener);
+SdlCordova.onOnEncodedSdlPData(proxyListener);
 SdlCordova.onOnTBTClientState(proxyListener);
 SdlCordova.onOnDriverDistraction(proxyListener);
 SdlCordova.onOnCommand(proxyListener);
@@ -990,3 +1016,6 @@ SdlCordova.onGenericResponse(proxyListener);
 SdlCordova.onError(proxyListener);
 SdlCordova.onProxyClosed(proxyListener);
 SdlCordova.onProxyFirstAccess(proxyListener);
+SdlCordova.onPutFileResponse(proxyListener);
+SdlCordova.onDeleteFileResponse(proxyListener);
+SdlCordova.onListFilesResponse(proxyListener);
