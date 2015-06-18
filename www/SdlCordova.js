@@ -40,13 +40,14 @@ var SdlCordova = {
 		return o instanceof Array ? o : [o];
 	},
 	
-	testPlugin: function(success, fail, resultType){
+	//
+	/*testPlugin: function(success, fail, resultType){
 		return cordova.exec(function(){alert("success");}, 
 				function(){alert("failure");}, 
 				"SdlCordova", 
 				"test", 
 				[resultType]);
-	},
+	},*/
 	
 	siphonLog: function(opts){
 		/*if(typeof msg == "string"){
@@ -70,14 +71,16 @@ var SdlCordova = {
 		//this.executeAction(opts, SdlCordova.Names.Actions.SIPHON_LOG, [opts.message]);
 		cordova.exec(this.iProxyListenerCallback, opts.error, "SdlCordova", SdlCordova.names.SIPHON_LOG, [opts.message]);
 	},
-
+	//
+	
 	createProxy: function(opts){
 
 		opts = this.extend(opts, SdlCordova.defaultOptsCreateProxy);
 
         this.createProxySuccess = opts.success;
         this.appName = opts.appName;
-		this.languageDesired = opts.languageDesired;
+		this.languageDesired = opts.languageDesired; //hmiDisplayLanguageDesired
+		this.hmiLanguageDesired = opts.hmiLanguageDesired; //added
 		this.appId = opts.appId;
 		this.majorVersion = opts.majorVersion;
         this.checkAndUpdateProxyCallback(opts);
@@ -92,7 +95,7 @@ var SdlCordova = {
 				languageDesired: opts.languageDesired,
 				hmiLanguageDesired: opts.hmiLanguageDesired,
 				appId : opts.appId
-		};		
+		};
 
 		//Jiaxi copied from old file
 		// Optional Params
@@ -105,7 +108,9 @@ var SdlCordova = {
         if(opts.sdlMsgVersion){ //not exist
         	params[SdlCordova.Names.RPCFields.Sdl_MSG_VERSION] = opts.sdlMsgVersion;
         }
-       
+       /*if(opts.language){ not needed renamed to languageDesired
+        	params[SdlCordova.Names.RPCFields.LANGUAGE] = opts.language;
+       }*/
        if(opts.autoActivateID){ //not exist
         	params[SdlCordova.Names.RPCFields.AUTO_ACTIVATE_ID] = opts.autoActivateID;
        }
@@ -176,7 +181,7 @@ var SdlCordova = {
 
 	getPersistentSyncData: function(opts){
 		opts = this.extend(opts, SdlCordova.defaultOptsNonRPC);
-		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_PERSISTENT_SYNC_DATA, [null]);
+		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_PERSISTENT_SDL_DATA, [null]);
 	},
 	
 	dispose: function(opts){
@@ -192,9 +197,6 @@ var SdlCordova = {
 	},
 	
 	sendRPCRequest: function(opts, rpcMessage){
-		//for debug
-		if(rpcMessage.request.name == "Show")
-			console.log("Show Request!!!"); 
 		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_SEND_RPC_REQUEST, [rpcMessage]);
 	},
 	
@@ -364,7 +366,24 @@ var SdlCordova = {
 	
 	deleteFile: function(correlationId, opts){
 		opts = this.extend(opts, SdlCordova.defaultOpts);
-		//needs work
+		// added
+		var rpcRequestParams = {};
+		
+		if(opts.sdlFileName){
+			rpcRequestParams[SdlCordova.names.sdlFileName] = opts.sdlFileName;
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_deleteFile;
+		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
 	},
 	
 	deleteInteractionChoiceSet: function(correlationId, opts){
@@ -434,7 +453,19 @@ var SdlCordova = {
 	
 	listFiles: function(correlationId, opts){
 		opts = this.extend(opts, SdlCordova.defaultOpts);
-		//needs work
+		
+		//added
+		var rpcRequestParams = {};
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_listFiles;
+		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
 	},
 	
 	performInteraction: function(correlationId, opts){
@@ -794,16 +825,16 @@ var SdlCordova = {
 		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SPEECH_CAPABILITIES, [null]);
 	},
 	
-	getSdlLanguage: function(opts){
+	getSyncLanguage: function(opts){
 		opts = this.extend(opts, SdlCordova.defaultOptsNonRPC);
 		
-		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SDL_LANGUAGE, [null]);
+		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SYNC_LANGUAGE, [null]);
 	},
 	
-	getSdlMsgVersion: function(opts){
+	getSyncMsgVersion: function(opts){
 		opts = this.extend(opts, SdlCordova.defaultOptsNonRPC);
 		
-		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SDL_MSG_VERSION, [null]);
+		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SYNC_MSG_VERSION, [null]);
 	},
 	
 	getVehicleType: function(opts){
@@ -1016,6 +1047,15 @@ Image: function(value, imageType){
 	this[SdlCordova.names.value] = value;
 	this[SdlCordova.names.imageType] = imageType;
 }
+
+/*SoftButton: function(isHighlighted, softButtonID, systemAction, text, softButtonType){
+	this[SdlCordova.names.isHighlighted] = isHighlighted;
+	this[SdlCordova.names.softButtonID] = softButtonID;
+	this[SdlCordova.names.systemAction] = systemAction;
+	this[SdlCordova.names.text] = text;
+	this[SdlCordova.names.type] = softButtonType ;
+	this[SdlCordova.names.image] = image;
+}*/
 };
 
 // Define Static Variables
@@ -1088,6 +1128,15 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.alertText3 = "alertText3"; //added
 	SdlCordova.names.duration = "duration";
 	SdlCordova.names.playTone = "playTone";
+	
+	//SoftButton 
+	SdlCordova.names.isHighlighted = "isHighlighted";
+	SdlCordova.names.softButtonID = "softButtonID";
+	SdlCordova.names.systemAction = "systemAction";
+	//SdlCordova.names.text = "text";
+	//SdlCordova.names.type = "type";
+	SdlCordova.names.image = "image";
+	
 	
 	// CreateInteraction
 	SdlCordova.names.interactionChoiceSetID = "interactionChoiceSetID";
