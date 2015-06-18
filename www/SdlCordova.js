@@ -179,7 +179,7 @@ var SdlCordova = {
 			}
 		},
 
-	getPersistentSyncData: function(opts){
+	getPersistentSdlData: function(opts){
 		opts = this.extend(opts, SdlCordova.defaultOptsNonRPC);
 		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_PERSISTENT_SDL_DATA, [null]);
 	},
@@ -430,7 +430,7 @@ var SdlCordova = {
 		return this.sendRPCRequest(opts, rpcMessage);
 	},
 	
-	encodedSyncPData: function(correlationId, opts){
+	encodedSdlPData: function(correlationId, opts){
 		opts = this.extend(opts, SdlCordova.defaultOpts);
 		
 		var rpcRequestParams = {};
@@ -440,7 +440,7 @@ var SdlCordova = {
 		
 		// Build the request
 		var rpcRequest = {};
-		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_encodedSyncPData;
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_encodedSdlPData;
 		rpcRequest[SdlCordova.names.correlationID] = correlationId;
 		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
 		
@@ -825,16 +825,16 @@ var SdlCordova = {
 		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SPEECH_CAPABILITIES, [null]);
 	},
 	
-	getSyncLanguage: function(opts){
+	getSdlLanguage: function(opts){
 		opts = this.extend(opts, SdlCordova.defaultOptsNonRPC);
 		
-		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SYNC_LANGUAGE, [null]);
+		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SDL_LANGUAGE, [null]);
 	},
 	
-	getSyncMsgVersion: function(opts){
+	getSdlMsgVersion: function(opts){
 		opts = this.extend(opts, SdlCordova.defaultOptsNonRPC);
 		
-		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SYNC_MSG_VERSION, [null]);
+		return cordova.exec(opts.success, opts.error, "SdlCordova", SdlCordova.names.ACTION_GET_SDL_MSG_VERSION, [null]);
 	},
 	
 	getVehicleType: function(opts){
@@ -918,8 +918,8 @@ var SdlCordova = {
 		this.bind(SdlCordova.names.function_name_listFiles, f);
 	},
 	
-	onEncodedSyncPDataResponse: function(f){
-		this.bind(SdlCordova.names.function_name_encodedSyncPData, f);
+	onEncodedSdlPDataResponse: function(f){
+		this.bind(SdlCordova.names.function_name_encodedSdlPData, f);
 	},
 
 	onPerformAudioPassThruResponse: function(f){
@@ -986,8 +986,8 @@ var SdlCordova = {
 		this.bind(SdlCordova.names.RPC_NOTIFICATION_onButtonPress, f);
 	},
 
-	onOnEncodedSyncPData: function(f){
-		this.bind(SdlCordova.names.RPC_NOTIFICATION_onEncodedSyncPData, f);
+	onOnEncodedSdlPData: function(f){
+		this.bind(SdlCordova.names.RPC_NOTIFICATION_onEncodedSdlPData, f);
 	},
 
 	onOnTBTClientState: function(f){
@@ -1076,8 +1076,8 @@ SdlCordova.names.ACTION_GET_PERSISTENT_SDL_DATA = "getPersistentSdlData";
 SdlCordova.names.ACTION_GET_PRESET_BANK_CAPABILITIES = "getPresetBankCapabilities";
 SdlCordova.names.ACTION_GET_SOFT_BUTTON_CAPABILITIES = "getSoftButtonCapabilities";
 SdlCordova.names.ACTION_GET_SPEECH_CAPABILITIES = "getSpeechCapabilities";
-SdlCordova.names.ACTION_GET_SYNC_LANGUAGE = "getSyncLanguage";
-SdlCordova.names.ACTION_GET_SYNC_MSG_VERSION = "getSyncMsgVersion";
+SdlCordova.names.ACTION_GET_SDL_LANGUAGE = "getSdlLanguage";
+SdlCordova.names.ACTION_GET_SDL_MSG_VERSION = "getSdlMsgVersion";
 SdlCordova.names.ACTION_GET_VEHICLE_TYPE = "getVehicleType";
 SdlCordova.names.ACTION_GET_VR_CAPABILITIES = "getVrCapabilities";
 SdlCordova.names.ACTION_GET_WIPRO_VERSION = "getWiproVersion";
@@ -1270,7 +1270,7 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.function_name_registerAppInterface = "RegisterAppInterface";
 	SdlCordova.names.function_name_unregisterAppInterface = "UnregisterAppInterface";
 	SdlCordova.names.function_name_dialNumber = "DialNumber";
-	SdlCordova.names.function_name_encodedSyncPData = "EncodedSyncPData";
+	SdlCordova.names.function_name_encodedSdlPData = "EncodedSdlPData";
 	SdlCordova.names.function_name_subscribeButton = "SubscribeButton";
 	SdlCordova.names.function_name_unsubscribeButton = "UnsubscribeButton";
 	SdlCordova.names.function_name_subscribeVehicleData = "SubscribeVehicleData";
@@ -1298,7 +1298,7 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.RPC_NOTIFICATION_onButtonEvent = "OnButtonEvent";
 	SdlCordova.names.RPC_NOTIFICATION_onHMIStatus = "OnHMIStatus";
 	SdlCordova.names.RPC_NOTIFICATION_onTBTClientState = "OnTBTClientState";
-	SdlCordova.names.RPC_NOTIFICATION_onEncodedSyncPData = "OnEncodedSyncPData";
+	SdlCordova.names.RPC_NOTIFICATION_onEncodedSdlPData = "OnEncodedSdlPData";
 	SdlCordova.names.RPC_NOTIFICATION_onDriverDistraction = "OnDriverDistraction";
 	SdlCordova.names.RPC_NOTIFICATION_onAppInterfaceUnregistered = "OnAppInterfaceUnregistered";	
 	
