@@ -29,6 +29,7 @@ static NSString* proxyCommandCallbackId;
 @property (strong, nonatomic) PersistentSyncData* persistentSyncData;
 @property (strong, nonatomic) NSMutableDictionary* pendingRPCRequests;
 @property (nonatomic) BOOL receivedFirstNonNoneHMI;
+@property (strong, nonatomic) SDLRegisterAppInterfaceResponse* raiResponse;
 
 @end
 
@@ -45,6 +46,9 @@ static NSString* proxyCommandCallbackId;
 }
 
 +(CDVPluginResult*)createRegisterListenerResponseWithStatusCode:(CDVCommandStatus)statusCode info:(NSString*)info{
+ //   [SDLDebugTool logInfo:[NSString stringWithFormat:@" in Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    
+
     NSMutableDictionary* parametersObject = [[NSMutableDictionary alloc] init];
     NSMutableDictionary* registerListenerJSON = [[NSMutableDictionary alloc] init];
     
@@ -58,13 +62,16 @@ static NSString* proxyCommandCallbackId;
             [pluginResult setKeepCallbackAsBool:YES];
         }
     }
+  //  [SDLDebugTool logInfo:[NSString stringWithFormat:@"out of Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
     
     return pluginResult;
 }
 
 -(void)createProxy:(CDVInvokedUrlCommand*)command{
     
-    [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    //NSLog(@"SdlCordova createProxy");
+    
+//    [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
     
     
     if (!self.commandDelegate) {
@@ -150,8 +157,6 @@ static NSString* proxyCommandCallbackId;
         return;
     }
     @try {
-           [SDLDebugTool logInfo:[NSString stringWithFormat:@"Inside 2nd try ..Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
-       
         [SDLDebugTool logInfo:[NSString stringWithFormat:@" AppName : %@ , AppID = %@", appName, appId]];
         
         self.sdlProxy = [[SDLProxyALM alloc] initWithProxyDelegate:self
@@ -185,7 +190,7 @@ static NSString* proxyCommandCallbackId;
     
     [self.commandDelegate sendPluginResult:[SdlCordova createRegisterListenerResponseWithStatusCode:CDVCommandStatus_OK info:@"Callback registered successfully."] callbackId:command.callbackId];
     
-       [SDLDebugTool logInfo:[NSString stringWithFormat:@"ENd of 2nd try ..Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+      // [SDLDebugTool logInfo:[NSString stringWithFormat:@"End of 2nd try block of  Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
 }
 
 -(void)registerNewCallbackContext:(CDVInvokedUrlCommand*)command{
@@ -230,7 +235,7 @@ static NSString* proxyCommandCallbackId;
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
--(void)getPersistentSyncData:(CDVInvokedUrlCommand*)command{
+-(void)getPersistentSdlData:(CDVInvokedUrlCommand*)command{
     
     if (!self.commandDelegate) {
         NSLog(@"Could not execute command %@. No command Delegate.", NSStringFromSelector(_cmd));
@@ -258,6 +263,7 @@ static NSString* proxyCommandCallbackId;
 }
 
 -(void)sendRpcRequest:(CDVInvokedUrlCommand*)command{
+    //[SDLDebugTool logInfo:[NSString stringWithFormat:@" In Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
     
     if (!self.sdlProxy) {
         NSString* errorString = [NSString stringWithFormat:@"Could not execute command. No SdlProxy object has been instanciated. Call %@ first.", SDLCDVActionCreateProxy];
@@ -317,9 +323,13 @@ static NSString* proxyCommandCallbackId;
     }
     
     if ([rpcRequest.name isEqualToString:NAMES_AddCommand]
-        || [rpcRequest.name isEqualToString:NAMES_CreateInteractionChoiceSet]
-        || [rpcRequest.name isEqualToString:NAMES_SubscribeButton]
+        || [rpcRequest.name isEqualToString:NAMES_DeleteCommand]
         || [rpcRequest.name isEqualToString:NAMES_AddSubMenu]
+        || [rpcRequest.name isEqualToString:NAMES_DeleteSubMenu]
+        || [rpcRequest.name isEqualToString:NAMES_CreateInteractionChoiceSet]
+        || [rpcRequest.name isEqualToString:NAMES_DeleteInteractionChoiceSet]
+        || [rpcRequest.name isEqualToString:NAMES_SubscribeButton]
+        || [rpcRequest.name isEqualToString:NAMES_UnsubscribeButton]
         ) {
         if (![self.pendingRPCRequests valueForKey:[NSString stringWithFormat:@"%@", rpcRequest.correlationID]]) {
             [self.pendingRPCRequests setValue:rpcRequest forKey:[NSString stringWithFormat:@"%@", rpcRequest.correlationID]];
@@ -335,6 +345,9 @@ static NSString* proxyCommandCallbackId;
     else{
         NSLog(@"Could not execute command %@. No command Delegate.", NSStringFromSelector(_cmd));
     }
+ //   [SDLDebugTool logInfo:[NSString stringWithFormat:@"out of Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    
+
 }
 
 -(void)dispose:(CDVInvokedUrlCommand*)command{
@@ -373,7 +386,7 @@ static NSString* proxyCommandCallbackId;
 
 -(void)reset:(CDVInvokedUrlCommand*)command{
     
-    [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+  //  [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
     
     
     if (!self.sdlProxy) {
@@ -646,7 +659,7 @@ static NSString* proxyCommandCallbackId;
     }
     
     NSMutableArray* vrCapabilitiesJSONArray = [[NSMutableArray alloc] init];
-    for (SDLVrCapabilities* vrCapabilities in vrCapabilitesArray) {
+    for (SDLVRCapabilities* vrCapabilities in vrCapabilitesArray) {
         [vrCapabilitiesJSONArray addObject:[vrCapabilities value]];
     }
 
@@ -667,10 +680,8 @@ static NSString* proxyCommandCallbackId;
 
 -(void)enableSiphonDebug:(CDVInvokedUrlCommand*)command{
     
+  //  [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
     [SDLProxyALM enableSiphonDebug];
-    
-    [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
-    
     
     if (self.commandDelegate) {
         CDVPluginResult* successPluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -680,6 +691,8 @@ static NSString* proxyCommandCallbackId;
 
 -(void)disableSiphonDebug:(CDVInvokedUrlCommand*)command{
 
+   // [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    
     [SDLProxyALM disableSiphonDebug];
 
     if (self.commandDelegate) {
@@ -688,16 +701,119 @@ static NSString* proxyCommandCallbackId;
     }
 }
 
+
+-(NSDictionary*)jsonFromRPC:(SDLRPCMessage*)rpc{
+    // need to do from java code
+    // return [[rpc serializeAsDictionary:2] copy];
+    //  [SDLDebugTool logInfo:[NSString stringWithFormat:@"Json fromRPC Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    NSLog(@"In jsonFfomRPCmethod");
+    
+    
+    if (!rpc)  {
+        NSLog(@"RPCMessage is null. Cannot get RPCInfo.");
+       return nil;
+    }
+    
+    NSString *funcName = rpc.getFunctionName;
+    NSData* binaryData =  rpc.bulkData;
+    NSString *msgType = rpc.messageType;
+    
+    // JSONObject params = null;
+    //TODO: Should this be a hardcoded 2?
+    NSInteger version = [self.raiResponse.syncMsgVersion.majorVersion integerValue];
+   //[SDLDebugTool logInfo:[NSString stringWithFormat:@" vivek check - version = %li", (long)version]];
+   // NSDictionary* params  = [[rpc serializeAsDictionary:version] copy]; //rpc.serializeJSON((byte)2);
+    NSDictionary* params  = [[rpc serializeAsDictionary:2] copy];
+    // NSLog(@"Immediate Params Print", params.toString());
+    
+    //NSLog(@"Just before creating the NSdictionary !");
+    NSMutableDictionary* obj = [NSMutableDictionary new];
+    if (funcName) {
+        obj[@"FunctionName"] = funcName;
+    }
+    if (params) {
+        obj[@"JSONData"] = params;
+    }
+    if (msgType) {
+        obj[@"MessageType"] = msgType;
+    }
+    if (binaryData) {
+        obj[@"BinaryData"] = binaryData;
+    }
+    
+    if ([rpc isKindOfClass:[SDLRPCResponse class]] ) {
+        obj[@"CorrelationID"] = ((SDLRPCResponse*)rpc).correlationID;
+    }
+    
+    return obj;
+    //encode Binary Data to base 64
+    //String encodedBinaryData = Base64.encode(binaryData);
+    
+//    
+//    JSONObject *obj = new JSONObject();
+//    try {
+//        obj.put("FunctionName", funcName);
+//        obj.put("JSONData", params);
+//        obj.put("MessageType", msgType);
+//        obj.put("BinaryData", binaryData);
+//    } catch (JSONException e) {
+//        e.printStackTrace();
+//        Log.e("RPC JSON MSG", "Error creating rpc json msg");
+//    }
+//    */
+    /*
+     //int dataLength = binaryData.length;
+     //Log.i("Binary Data Message", String.valueOf(dataLength));
+     Log.d("RPCInfoStatus", "Successfully created RPC info JSONObject");
+     Log.d("JSON RPC Object: ", obj.toString());
+     return obj;
+     
+     }
+     
+     */
+}
+
+
 -(void)sendRPCCallback:(NSDictionary*)info{
     
+    
+    // [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
     if (!proxyCallbackDelegate) {
         NSLog(@"Could not execute command %@. No command Delegate.", NSStringFromSelector(_cmd));
         return;
     }
     
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:info];
+  //  [SDLDebugTool logInfo:[NSString stringWithFormat:@"CDVPluginResult argumentsAsJSON: %@", [result argumentsAsJSON]]]
+    ;
+   
     [result setKeepCallbackAsBool:YES];
+   /*
+    if (proxyCallbackDelegate != nil) {
+        
+        [SDLDebugTool logInfo:@"proxyCallbackDelegate is not nil. All is well."];
+    }
+    else{
+        [SDLDebugTool logInfo:@"proxyCallbackDelegate is nil. This should not happen."];
+    }
+
+    
+    [SDLDebugTool logInfo:[NSString stringWithFormat:@" Calling sendPluginResult - value of result:  status: %@,  id: %@,  keepCallBack: %@,  Associatedid:%@ ", [NSString stringWithFormat:@"%@", [result status]], (NSString*)[result message],[NSString stringWithFormat:@"%@", [result keepCallback]] , (NSString*)[result associatedObject]]];
+
+    
+    */
+    
+    //[SDLDebugTool logInfo:[NSString stringWithFormat:@"sendPluginResult - proxyCallbackDelegate=%@, callbackId=%@", proxyCallbackDelegate, proxyCommandCallbackId]];
+    
+    
+    //TODO: This is not calling into JS. Check result & info objects for completeness.
     [proxyCallbackDelegate sendPluginResult:result callbackId:proxyCommandCallbackId];
+    
+    
+    
+  //  [SDLDebugTool logInfo:[NSString stringWithFormat:@"out of Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    
+    
 }
 
 -(void)siphonLog:(CDVInvokedUrlCommand*)command{
@@ -726,14 +842,21 @@ static NSString* proxyCommandCallbackId;
 
 #pragma mark ProxyALMDelegate Methods
 
+-(void)onRegisterAppInterfaceResponse:(SDLRegisterAppInterfaceResponse *)response{
+  //  [SDLDebugTool logInfo:[NSString stringWithFormat:@" In begin of onRegisterAppInterfaceResponse : %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    self.raiResponse = response;
+}
+
 -(void) onOnHMIStatus:(SDLOnHMIStatus*) notification{
+    
+    // [SDLDebugTool logInfo:[NSString stringWithFormat:@" In begin of onONHMIStatus : %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
     if (!self.receivedFirstNonNoneHMI) {
-        if (notification.hmiLevel != SDLHMILevel.HMI_NONE) {
+        if (notification.hmiLevel != SDLHMILevel.NONE) {
             self.receivedFirstNonNoneHMI = YES;
             [self onProxyFirstAccess];
         }
     }
-
+       //  [SDLDebugTool logInfo:[NSString stringWithFormat:@" In pasing of oONHMIStatus : %@, Method: %@ , status :%@", NSStringFromClass([self class]), NSStringFromSelector(_cmd), notification.hmiLevel.value]];
     self.currentHMIStatusNotification = notification;
     [self sendRPCCallback:[self jsonFromRPC:notification]];
 }
@@ -769,7 +892,7 @@ static NSString* proxyCommandCallbackId;
     if(!pendingRPCRequest){
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLAddCommand* addCommand = [[SDLAddCommand alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];
+        SDLAddCommand* addCommand = [[SDLAddCommand alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:1]];
         [self.persistentSyncData addCommand:addCommand];
     }
     
@@ -783,7 +906,7 @@ static NSString* proxyCommandCallbackId;
     if(!pendingRPCRequest){
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLAddSubMenu* subMenu = [[SDLAddSubMenu alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];  // TODO Check that VERSION can be hardcoded]];
+        SDLAddSubMenu* subMenu = [[SDLAddSubMenu alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:1]];  // TODO Check that VERSION can be hardcoded]];
         [self.persistentSyncData addSubMenu:subMenu];
     }
     
@@ -796,12 +919,25 @@ static NSString* proxyCommandCallbackId;
 
 -(void) onCreateInteractionChoiceSetResponse:(SDLCreateInteractionChoiceSetResponse*) response{
     
+//[SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+    
+    
     SDLRPCRequest* pendingRPCRequest = [self pendingRPCRequestFromRPCResponse:response];
+  //  NSLog(@"pendingRPCRequest : %@", [pendingRPCRequest description]);
     
     if(!pendingRPCRequest){
+        
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLCreateInteractionChoiceSet* addChoiceSet = [[SDLCreateInteractionChoiceSet alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];  // TODO Check that VERSION can be hardcoded]];
+        //     [SDLDebugTool logInfo:[NSString stringWithFormat:@"Class: %@, Method: %@ - in else condition ", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
+
+        
+        //TODO: This will return nil if something went wrong.
+        NSMutableDictionary* pendingRPCRequestDictionary = [pendingRPCRequest serializeAsDictionary:1];
+     //   NSLog(@"pendingRPCRequestDictionary : %@", [pendingRPCRequestDictionary description]);
+        
+        SDLCreateInteractionChoiceSet* addChoiceSet = [[SDLCreateInteractionChoiceSet alloc] initWithDictionary:pendingRPCRequestDictionary];  // TODO Check that VERSION can be hardcoded]];
+       
         [self.persistentSyncData addChoiceSet:addChoiceSet];
     }
     
@@ -815,7 +951,7 @@ static NSString* proxyCommandCallbackId;
     if(!pendingRPCRequest){
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLDeleteCommand* deleteCommand = [[SDLDeleteCommand alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];  // TODO Check that VERSION can be hardcoded]];
+        SDLDeleteCommand* deleteCommand = [[SDLDeleteCommand alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:1]];  // TODO Check that VERSION can be hardcoded]];
         [self.persistentSyncData removeCommand:deleteCommand];
     }
         
@@ -829,7 +965,7 @@ static NSString* proxyCommandCallbackId;
     if(!pendingRPCRequest){
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLDeleteInteractionChoiceSet* deleteICS = [[SDLDeleteInteractionChoiceSet alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];  // TODO Check that VERSION can be hardcoded]];
+        SDLDeleteInteractionChoiceSet* deleteICS = [[SDLDeleteInteractionChoiceSet alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:1]];  // TODO Check that VERSION can be hardcoded]];
         [self.persistentSyncData removeChoiceSet:deleteICS];
     }
         
@@ -843,7 +979,7 @@ static NSString* proxyCommandCallbackId;
     if(!pendingRPCRequest){
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLDeleteSubMenu* deleteSubMenu = [[SDLDeleteSubMenu alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];  // TODO Check that VERSION can be hardcoded]];
+        SDLDeleteSubMenu* deleteSubMenu = [[SDLDeleteSubMenu alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:1]];  // TODO Check that VERSION can be hardcoded]];
         [self.persistentSyncData removeSubMenu:deleteSubMenu];
     }
     
@@ -885,7 +1021,8 @@ static NSString* proxyCommandCallbackId;
     if(!pendingRPCRequest){
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLSubscribeButton* subscribeButton = [[SDLSubscribeButton alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];  // TODO Check that VERSION can be hardcoded]];
+        
+       SDLSubscribeButton* subscribeButton = [[SDLSubscribeButton alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:1]];  //TODO: Check that VERSION can be hardcoded]];
         [self.persistentSyncData addButtonSubscription:subscribeButton];
     }
     
@@ -899,7 +1036,7 @@ static NSString* proxyCommandCallbackId;
     if(!pendingRPCRequest){
         NSLog(@"No pending rpc request found. Could not add to persistant SYNC Data.");
     } else {
-        SDLUnsubscribeButton* unsubscribeButton = [[SDLUnsubscribeButton alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:2]];  // TODO Check that VERSION can be hardcoded]];
+        SDLUnsubscribeButton* unsubscribeButton = [[SDLUnsubscribeButton alloc] initWithDictionary:[pendingRPCRequest serializeAsDictionary:1]];  // TODO Check that VERSION can be hardcoded]];
         [self.persistentSyncData removeButtonSubscription:unsubscribeButton];
     }
     
@@ -947,9 +1084,7 @@ static NSString* proxyCommandCallbackId;
     return request;
 }
 
--(NSDictionary*)jsonFromRPC:(SDLRPCMessage*)rpc{
-    return [[rpc serializeAsDictionary:2] copy];
-}
+
 
 -(NSDictionary*)createProxyEvent:(NSDictionary*)event{
     return @{SDLCDVProxyEventProxyEventKey: event};
