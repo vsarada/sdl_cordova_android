@@ -1,6 +1,6 @@
 //
 //  SdlCordova.h
-//  CordovaPluginSyncProxy
+//  CordovaPluginSdlProxy
 //
 //  Copyright (c) 2013, Ford Motor Company All rights reserved.
 //
@@ -15,7 +15,7 @@
 -(void)createProxy:(CDVInvokedUrlCommand*)command;
 -(void)registerNewCallbackContext:(CDVInvokedUrlCommand*)command;
 -(void)doesProxyExist:(CDVInvokedUrlCommand*)command;
--(void)getPersistentSyncData:(CDVInvokedUrlCommand*)command;
+-(void)getPersistentSdlData:(CDVInvokedUrlCommand*)command;
 -(void)sendRpcRequest:(CDVInvokedUrlCommand*)command;
 -(void)dispose:(CDVInvokedUrlCommand*)command;
 -(void)reset:(CDVInvokedUrlCommand*)command;
@@ -27,7 +27,7 @@
 -(void)getSoftButtonCapabilities:(CDVInvokedUrlCommand*)command;
 -(void)getSpeechCapabilities:(CDVInvokedUrlCommand*)command;
 -(void)getSyncLanguage:(CDVInvokedUrlCommand*)command;
--(void)getSyncMsgVersion:(CDVInvokedUrlCommand*)command;
+-(void)getSdlMsgVersion:(CDVInvokedUrlCommand*)command;
 -(void)getVehicleType:(CDVInvokedUrlCommand*)command;
 -(void)getVrCapabilities:(CDVInvokedUrlCommand*)command;
 -(void)getWiproVersion:(CDVInvokedUrlCommand*)command;
