@@ -141,7 +141,7 @@ static NSString* const BUTTON_SUBSCRIPTIONS = @"buttonSubscriptions";
         return @{};
     }
     
-    NSDictionary* rpcJSON = [[rpcRequest serializeAsDictionary:2] copy];
+    NSDictionary* rpcJSON = [[rpcRequest serializeAsDictionary:1] copy];
     NSDictionary* requestJSON = [[rpcJSON valueForKey:NAMES_request] copy];
 
     NSDictionary* rpcParameters = [[requestJSON valueForKey:NAMES_parameters] copy];
