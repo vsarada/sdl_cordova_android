@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>QA Test</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	
+	<style type="text/css">
+	.clear{
+		clear: both;
+	}
+	#log div{
+		border-top: 1px solid #777;
+		margin-top: 3px;
+		padding-top: 3px;
+	}
+	#buttons{
+		text-align: center;
+		width: 100%;
+		padding: 5px 0 9px 0;
+	}
+	#buttons button{
+		margin-bottom: 5px;
+	}
+	button{
+		font-size: 18px;
+		padding: 8px;
+	}
+	#tests{
+		font-size: 18px;
+	}
+	.red{
+		color: #f00;
+	}
+	.title{
+		font-weight: bold;
+		font-size: 1.2em;
+		border-bottom: 1px solid #777;
+		margin-bottom: 5px;
+	}
+	#tests, #tests option{
+		max-width: 100%;
+		overflow: hidden;
+	}
+	</style>
+	
+	<script type="text/javascript" src="cordova.js"></script>
+		
+	<script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+	
+	<script type="text/javascript" src="js/QATestManager.js"></script>
+	<script type="text/javascript" src="js/test.js"></script>
+	
+	<script type="text/javascript" src="js/tests/everything-good.js"></script>
+	<script type="text/javascript" src="js/tests/bad-rpcs.js"></script>
+	<script type="text/javascript" src="js/tests/multiple-small-tests.js"></script>
+</head>
+<body>
+
+<h1>QA Test</h1>
+
+<div class="title">Options</div>
+<div id="buttons">
+	<button onclick="window.location.reload()">Reload App</button>
+	<button onclick="navigator.app.exitApp()">Exit App</button>
+	<button id="createDispose">Dispose</button>
+	<button onclick="SyncProxyAC.reset()">Reset</button>
+	<button id="siphonToggleBtn" onclick="toggleSiphon()">Enable Siphon</button>
+</div>
+<div class="clear"></div>
+<br />
+<div>
+	<div class="title">Proxy Status:</div>
+	<table>
+		<tr>
+			<td align="right"><strong>Created:</strong></td>
+			<td id="proxyCreatedStatus"></td>
+		</tr>
+		<tr>
+			<td align="right"><strong>Connected:</strong></td>
+			<td id="connectionStatus"></td>
+		</tr>
+		<tr>
+			<td align="right"><strong>Initialized:</strong></td>
+			<td id="initializedStatus"></td>
+		</tr>
+		<tr>
+			<td align="right"><strong>HMI Status:</strong></td>
+			<td id="hmiStatus"></td>
+		</tr>
+		<tr>
+			<td align="right"><strong>Siphon Enabled:</strong></td>
+			<td id="siphonStatus"></td>
+		</tr>
+	</table>
+</div>
+<br />
+<div>
+	<div class="title">Tests:</div>
+	<select id="tests"></select>
+	<br />
+	<button id="startTestBtn" onclick="runTest()">Start Test</button>
+	&nbsp;&nbsp;
+	<button id="forceStopBtn" onclick="forceStopTest()" disabled="disabled">Force Stop</button>
+	<br /><br />
+	
+	<div class="title">Test Results:</div>
+	<table>
+		<tr>
+			<td align="right"><strong>RPCs Sent:</strong></td>
+			<td id="rpcCount">0</td>
+		</tr>
+		<tr>
+			<td align="right"><strong>RPC Send Successes:</strong></td>
+			<td id="rpcSendSuccessCount">0</td>
+		</tr>
+		<tr>
+			<td align="right"><strong>RPC Send Errors:</strong></td>
+			<td id="rpcSendErrorCount">0</td>
+		</tr>
+		<tr>
+			<td align="right"><strong>Number of Responses:</strong></td>
+			<td id="rpcResponseCount">0</td>
+		</tr>
+		<tr>
+			<td align="right"><strong>Response Errors</strong></td>
+			<td id="rpcErrorCount">0</td>
+		</tr>
+		<tr>
+			<td align="right"><strong>Status:</strong></td>
+			<td id="testStatus"></td>
+		</tr>
+	</table>
+	
+	<br /><br />
+	Test Log: &nbsp;&nbsp;&nbsp; <a href="#" onclick="clearLog()">Clear</a>
+	<div id="log"><div></div></div>
+	
+	<br /><br />
+	
+	
+</div>
+
+</body>
+</html>
