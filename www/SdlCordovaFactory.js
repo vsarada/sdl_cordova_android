@@ -78,7 +78,7 @@ function AddCommand(){
 	//added
 	this.setCmdIcon = function(cmdIcon){
 		this.cmdIcon = cmdIcon;
-	}
+	};
 	
 	this.addVrCommand = function(cmd){
 		//this.vrCommands.push(cmd);
@@ -112,7 +112,7 @@ function AddCommand(){
 	//added
 	this.getCmdIcon = function(){
 		return this.cmdIcon;
-	}
+	};
 }
 AddCommand.prototype = Object.create(RPCBase.prototype);
 factory.AddCommand = AddCommand;
@@ -172,6 +172,7 @@ function Alert(){
 	this.alertText3 = null; //added
 	this.playTone = true;
 	this.duration = null;
+	this.softButtons = null; //added
 	
 	this.setTTSText = function(text){
 		this.ttsChunks = [new SdlCordova.TTSChunk(SdlCordova.names.speechCapabilities_TEXT, text)];
@@ -206,6 +207,18 @@ function Alert(){
 		this.duration = milliseconds;
 	};
 	
+	// added
+	this.setSoftButtons = function(softButtonArray){
+		this.softButtons = softButtonArray ? SdlCordova.toArray(softButtonArray) : null;
+	};
+	
+	this.addSoftButton = function(button){
+		if(this.softButtons == null)
+			this.softButtons = [button];
+		else
+			this.softButtons.push(button);
+	};
+	
 	this.getTTSChunks = function(){
 		return this.ttsChunks;
 	};
@@ -221,6 +234,11 @@ function Alert(){
 	
 	this.getDuration = function(){
 		return this.duration;
+	};
+	
+	// added
+	this.getSoftButtons = function(){
+		return this.softButtons;
 	};
 }
 Alert.prototype = Object.create(RPCBase.prototype);
@@ -503,6 +521,8 @@ function SetGlobalProperties(){
 	this.timeoutPromptTTSText = [];*/
 	this.helpPromptTTSChunks = null;
 	this.timeoutPromptTTSChunks = null;
+	this.vrHelpTitle = null; //added
+	this.vrHelp = null; //added
 	
 	this.setHelpPromptTTSText = function(ttsText, type){
 		type = type ? type.toUpperCase() : SdlCordova.names.speechCapabilities_TEXT;
@@ -546,6 +566,30 @@ function SetGlobalProperties(){
 		}else{
 			this.timeoutPromptTTSChunks.push(chunk);
 		}
+	};
+	
+	// added
+	this.setVrHelp = function(vrHelpArray){
+		this.vrHelp = vrHelpArray ? SdlCordova.toArray(vrHelpArray) : null;	
+	};
+	
+	this.addVrHelp = function(vrHelp){
+		if(this.vrHelp == null)
+			this.vrHelp = [vrHelp];
+		else
+			this.vrHelp.push(vrHelp);
+	};
+	
+	this.setVrHelpTitle = function(vrHelpTitle){
+		this.vrHelpTitle = vrHelpTitle;
+	};
+	
+	this.getVrHelpTitle = function(){
+		return this.vrHelpTitle;
+	};
+	
+	this.getVrHelp = function(){
+		return this.vrHelp;
 	};
 }
 SetGlobalProperties.prototype = Object.create(RPCBase.prototype);
@@ -616,13 +660,15 @@ function Show(){
 	this.functionName = "show";
 	this.mainField1 = null;
 	this.mainField2 = null;
-	//added
-	this.mainField3 = null;
-	this.mainField4 = null;
+	this.mainField3 = null; //added
+	this.mainField4 = null; //added
 	this.alignment = null;
 	this.statusBar = null;
 	this.mediaClock = null;
 	this.mediaTrack = null;
+	this.softButtons = null; //added
+	this.graphic = null; //added
+	this.customPresets = null; //added
 	
 	// modified
 	this.setDisplayText = function(line1, line2, line3, line4){
@@ -674,6 +720,33 @@ function Show(){
 			this.mediaClock = (m < 9 ? " " + m : m) + ":" + (s < 9 ? "0" + s : s);
 		}
 	};
+	
+	// added
+	this.setSoftButtons = function(softButtonArray){
+		this.softButtons = softButtonArray ? SdlCordova.toArray(softButtonArray) : null;
+	};
+	
+	this.addSoftButton = function(button){
+		if(this.softButtons == null)
+			this.softButtons = [button];
+		else
+			this.softButtons.push(button);
+	};
+	
+	this.setGraphic = function(graphic){
+		this.graphic = graphic;
+	};
+	
+	this.setCustomPresets = function(customPresetArray){
+		this.customPresets = customPresetArray ? SdlCordova.toArray(customPresetArray) : null;
+	};
+	
+	this.addCustomPreset = function(preset){
+		if(this.customPresets == null)
+			this.customPresets = [preset];
+		else
+			this.customPresets.push(preset);
+	};
 
 	this.getDisplayLine1 = function(){
 		return this.mainField1;
@@ -697,6 +770,19 @@ function Show(){
 	this.getMediaTrack = function(){
 		return this.mediaTrack;
 	};	
+	
+	// added
+	this.getSoftButtons = function(){
+		return this.softButtons;
+	};
+	
+	this.getGraphic = function(){
+		return this.graphic;
+	};
+	
+	this.getCustomPresets = function(){
+		return this.customPresets;
+	};
 }
 Show.prototype = Object.create(RPCBase.prototype);
 factory.Show = Show;
@@ -853,6 +939,1028 @@ function ListFiles(){
 ListFiles.prototype = Object.create(RPCBase.prototype);
 factory.ListFiles = ListFiles;
 
+function PerformAudioPassThru(){
+	RPCBase.call(this);
+	
+	this.functionName = "performAudioPassThru";
+	this.maxDuration = null;
+	this.audioPassThruDisplayText1 = null;
+	this.audioPassThruDisplayText2 = null;
+    this.muteAudio = null;
+    this.samplingRate = null;
+    this.audioType = null;
+    this.initialPrompt = null;
+    this.bitsPerSample = null;
+	
+	this.setMaxDuration = function(maxDuration){
+		this.maxDuration = maxDuration;
+	};
+	
+	this.setAudioPassThruDisplayText = function(text1, text2){
+		this.audioPassThruDisplayText1 = text1;
+		this.audioPassThruDisplayText2 = text2;
+	};
+	
+	this.setMuteAudio = function(muteAudio){
+		this.muteAudio = muteAudio;
+	};
+	
+	this.setSamplingRate = function(samplingRate){
+		this.samplingRate = samplingRate;
+	};
+	
+	this.setAudioType = function(audioType){
+		this.audioType = audioType;
+	};
+	
+	this.setInitialText = function(text){
+		this.initialPrompt = [new SdlCordova.TTSChunk(SdlCordova.names.speechCapabilities_TEXT, text)];
+	};
+	
+	this.setInitialPrompt = function(ttsChunkArray){
+		this.initialPrompt = ttsChunkArray ? SdlCordova.toArray(ttsChunkArray) : null;
+	};
+	
+	this.addInitialPrompt = function(chunk){
+		if(this.initialPrompt == null)
+			this.initialPrompt = [chunk];
+		else
+			this.initialPrompt.push(chunk);
+	};
+	
+	this.setBitsPerSample = function(bitsPerSample){
+		this.bitsPerSample = bitsPerSample;
+	};
+	
+	this.getMaxDuration = function(){
+		return this.maxDuration;
+	};
+	
+	this.getAudioPassThruDisplayText1 = function(){
+		return this.audioPassThruDisplayText1;
+	};
+	
+	this.getAudioPassThruDisplayText2 = function(){
+		return this.audioPassThruDisplayText2;
+	};
+	
+	this.getMuteAudio = function(){
+		return this.muteAudio;
+	};
+	
+	this.getSamplingRate = function(){
+		return this.samplingRate;
+	};
+	
+	this.getAudioType = function(){
+		return this.audioType;
+	};
+	
+	this.getInitialPrompt = function(){
+		return this.initialPrompt;
+	};
+	
+	this.getBitsPerSample = function(){
+		return this.bitsPerSample;
+	};
+}
+PerformAudioPassThru.prototype = Object.create(RPCBase.prototype);
+factory.PerformAudioPassThru = PerformAudioPassThru;
+
+function EndAudioPassThru(){
+	RPCBase.call(this);
+	
+	this.functionName = "endAudioPassThru";
+}
+EndAudioPassThru.prototype = Object.create(RPCBase.prototype);
+factory.EndAudioPassThru = EndAudioPassThru;
+
+function SubscribeVehicleData(){
+	RPCBase.call(this);
+	
+	this.functionName = "subscribeVehicleData";
+	this.rpm = null;
+	this.externalTemperature = null;
+	this.fuelLevel = null;
+	this.prndl = null;
+	this.tirePressure = null;
+	this.engineTorque = null;
+	this.odometer = null;
+	this.gps = null;
+	this.fuelLevel_State = null;
+	this.instantFuelConsumption = null;
+	this.beltStatus = null;
+	this.bodyInformation = null;
+	this.deviceStatus = null;
+	this.driverBraking = null;
+	this.wiperStatus = null;
+	this.headLampStatus = null;
+	this.accPedalPosition = null;
+	this.steeringWheelAngle = null;
+	this.eCallInfo = null;
+	this.airbagStatus = null;
+	this.emergencyEvent = null;
+	this.clusterModeStatus = null;
+	this.myKey = null;
+	this.speed = null;
+	
+	this.setRpm = function(rpm){
+		this.rpm = rpm;
+	};
+	
+	this.setExternalTemperature = function(externalTemperature){
+		this.externalTemperature = externalTemperature;
+	};
+	
+	this.setFuelLevel = function(fuelLevel){
+		this.fuelLevel = fuelLevel;
+	};
+	
+	this.setPrndl = function(prndl){
+		this.prndl = prndl;
+	};
+	
+	this.setTirePressure = function(tirePressure){
+		this.tirePressure = tirePressure;
+	};
+	
+	this.setEngineTorque = function(engineTorque){
+		this.engineTorque = engineTorque;
+	};
+	
+	this.setOdometer = function(odometer){
+		this.odometer = odometer;
+	};
+	
+	this.setGps = function(gps){
+		this.gps = gps;
+	};
+	
+	this.setFuelLevel_State = function(fuelLevel_State){
+		this.fuelLevel_State = fuelLevel_State;
+	};
+	
+	this.setInstantFuelConsumption = function(instantFuelConsumption){
+		this.instantFuelConsumption = instantFuelConsumption;
+	};
+	
+	this.setBeltStatus = function(beltStatus){
+		this.beltStatus = beltStatus;
+	};
+	
+	this.setBodyInformation = function(bodyInformation){
+		this.bodyInformation = bodyInformation;
+	};
+	
+	this.setDeviceStatus = function(deviceStatus){
+		this.deviceStatus = deviceStatus;
+	};
+	
+	this.setDriverBraking = function(driverBraking){
+		this.driverBraking = driverBraking;
+	};
+	
+	this.setWiperStatus = function(wiperStatus){
+		this.wiperStatus = wiperStatus;
+	};
+	
+	this.setHeadLampStatus = function(headLampStatus){
+		this.headLampStatus = headLampStatus;
+	};
+	
+	this.setAccPedalPosition = function(accPedalPosition){
+		this.accPedalPosition = accPedalPosition;
+	};
+	
+	this.setSteeringWheelAngle = function(steeringWheelAngle){
+		this.steeringWheelAngle = steeringWheelAngle;
+	};
+	
+	this.setECallInfo = function(eCallInfo){
+		this.eCallInfo = eCallInfo;
+	};
+	
+	this.setAirbagStatus = function(airbagStatus){
+		this.airbagStatus = airbagStatus;
+	};
+	
+	this.setEmergencyEvent = function(emergencyEvent){
+		this.emergencyEvent = emergencyEvent;
+	};
+	
+	this.setClusterModeStatus = function(clusterModeStatus){
+		this.clusterModeStatus = clusterModeStatus;
+	};
+	
+	this.setMyKey = function(myKey){
+		this.myKey = myKey;
+	};
+	
+	this.setSpeed = function(speed){
+		this.speed = speed;
+	};
+	
+	this.getRpm = function(){
+		return this.rpm;
+	};
+	
+	this.getExternalTemperature = function(){
+		return this.externalTemperature;
+	};
+	
+	this.getFuelLevel = function(){
+		return this.fuelLevel;
+	};
+	
+	this.getPrndl = function(){
+		return this.prndl;
+	};
+	
+	this.getTirePressure = function(){
+		return this.tirePressure;
+	};
+	
+	this.getEngineTorque = function(){
+		return this.engineTorque;
+	};
+	
+	this.getOdometer = function(){
+		return this.odometer;
+	};
+	
+	this.getGps = function(){
+		return this.gps;
+	};
+	
+	this.getFuelLevel_State = function(){
+		return this.fuelLevel_State;
+	};
+	
+	this.getInstantFuelConsumption = function(){
+		return this.instantFuelConsumption;
+	};
+	
+	this.getBeltStatus = function(){
+		return this.beltStatus;
+	};
+	
+	this.getBodyInformation = function(){
+		return this.bodyInformation;
+	};
+	
+	this.getDeviceStatus = function(){
+		return this.deviceStatus;
+	};
+	
+	this.getDriverBraking = function(){
+		return this.driverBraking;
+	};
+	
+	this.getWiperStatus = function(){
+		return this.wiperStatus;
+	};
+	
+	this.getHeadLampStatus = function(){
+		return this.headLampStatus;
+	};
+	
+	this.getAccPedalPosition = function(){
+		return this.accPedalPosition;
+	};
+	
+	this.getSteeringWheelAngle = function(){
+		return this.steeringWheelAngle;
+	};
+	
+	this.getECallInfo = function(){
+		return this.eCallInfo;
+	};
+	
+	this.getAirbagStatus = function(){
+		return this.airbagStatus;
+	};
+	
+	this.getEmergencyEvent = function(){
+		return this.emergencyEvent;
+	};
+	
+	this.getClusterModeStatus = function(){
+		return this.clusterModeStatus;
+	};
+	
+	this.getMyKey = function(){
+		return this.myKey;
+	};
+	
+	this.getSpeed = function(){
+		return this.speed;
+	};
+}
+SubscribeVehicleData.prototype = Object.create(RPCBase.prototype);
+factory.SubscribeVehicleData = SubscribeVehicleData;
+
+function UnsubscribeVehicleData(){
+	RPCBase.call(this);
+	
+	this.functionName = "unsubscribeVehicleData";
+	this.rpm = null;
+	this.externalTemperature = null;
+	this.fuelLevel = null;
+	this.prndl = null;
+	this.tirePressure = null;
+	this.engineTorque = null;
+	this.odometer = null;
+	this.gps = null;
+	this.fuelLevel_State = null;
+	this.instantFuelConsumption = null;
+	this.beltStatus = null;
+	this.bodyInformation = null;
+	this.deviceStatus = null;
+	this.driverBraking = null;
+	this.wiperStatus = null;
+	this.headLampStatus = null;
+	this.accPedalPosition = null;
+	this.steeringWheelAngle = null;
+	this.eCallInfo = null;
+	this.airbagStatus = null;
+	this.emergencyEvent = null;
+	this.clusterModeStatus = null;
+	this.myKey = null;
+	this.speed = null;
+	
+	this.setRpm = function(rpm){
+		this.rpm = rpm;
+	};
+	
+	this.setExternalTemperature = function(externalTemperature){
+		this.externalTemperature = externalTemperature;
+	};
+	
+	this.setFuelLevel = function(fuelLevel){
+		this.fuelLevel = fuelLevel;
+	};
+	
+	this.setPrndl = function(prndl){
+		this.prndl = prndl;
+	};
+	
+	this.setTirePressure = function(tirePressure){
+		this.tirePressure = tirePressure;
+	};
+	
+	this.setEngineTorque = function(engineTorque){
+		this.engineTorque = engineTorque;
+	};
+	
+	this.setOdometer = function(odometer){
+		this.odometer = odometer;
+	};
+	
+	this.setGps = function(gps){
+		this.gps = gps;
+	};
+	
+	this.setFuelLevel_State = function(fuelLevel_State){
+		this.fuelLevel_State = fuelLevel_State;
+	};
+	
+	this.setInstantFuelConsumption = function(instantFuelConsumption){
+		this.instantFuelConsumption = instantFuelConsumption;
+	};
+	
+	this.setBeltStatus = function(beltStatus){
+		this.beltStatus = beltStatus;
+	};
+	
+	this.setBodyInformation = function(bodyInformation){
+		this.bodyInformation = bodyInformation;
+	};
+	
+	this.setDeviceStatus = function(deviceStatus){
+		this.deviceStatus = deviceStatus;
+	};
+	
+	this.setDriverBraking = function(driverBraking){
+		this.driverBraking = driverBraking;
+	};
+	
+	this.setWiperStatus = function(wiperStatus){
+		this.wiperStatus = wiperStatus;
+	};
+	
+	this.setHeadLampStatus = function(headLampStatus){
+		this.headLampStatus = headLampStatus;
+	};
+	
+	this.setAccPedalPosition = function(accPedalPosition){
+		this.accPedalPosition = accPedalPosition;
+	};
+	
+	this.setSteeringWheelAngle = function(steeringWheelAngle){
+		this.steeringWheelAngle = steeringWheelAngle;
+	};
+	
+	this.setECallInfo = function(eCallInfo){
+		this.eCallInfo = eCallInfo;
+	};
+	
+	this.setAirbagStatus = function(airbagStatus){
+		this.airbagStatus = airbagStatus;
+	};
+	
+	this.setEmergencyEvent = function(emergencyEvent){
+		this.emergencyEvent = emergencyEvent;
+	};
+	
+	this.setClusterModeStatus = function(clusterModeStatus){
+		this.clusterModeStatus = clusterModeStatus;
+	};
+	
+	this.setMyKey = function(myKey){
+		this.myKey = myKey;
+	};
+	
+	this.setSpeed = function(speed){
+		this.speed = speed;
+	};
+	
+	this.getRpm = function(){
+		return this.rpm;
+	};
+	
+	this.getExternalTemperature = function(){
+		return this.externalTemperature;
+	};
+	
+	this.getFuelLevel = function(){
+		return this.fuelLevel;
+	};
+	
+	this.getPrndl = function(){
+		return this.prndl;
+	};
+	
+	this.getTirePressure = function(){
+		return this.tirePressure;
+	};
+	
+	this.getEngineTorque = function(){
+		return this.engineTorque;
+	};
+	
+	this.getOdometer = function(){
+		return this.odometer;
+	};
+	
+	this.getGps = function(){
+		return this.gps;
+	};
+	
+	this.getFuelLevel_State = function(){
+		return this.fuelLevel_State;
+	};
+	
+	this.getInstantFuelConsumption = function(){
+		return this.instantFuelConsumption;
+	};
+	
+	this.getBeltStatus = function(){
+		return this.beltStatus;
+	};
+	
+	this.getBodyInformation = function(){
+		return this.bodyInformation;
+	};
+	
+	this.getDeviceStatus = function(){
+		return this.deviceStatus;
+	};
+	
+	this.getDriverBraking = function(){
+		return this.driverBraking;
+	};
+	
+	this.getWiperStatus = function(){
+		return this.wiperStatus;
+	};
+	
+	this.getHeadLampStatus = function(){
+		return this.headLampStatus;
+	};
+	
+	this.getAccPedalPosition = function(){
+		return this.accPedalPosition;
+	};
+	
+	this.getSteeringWheelAngle = function(){
+		return this.steeringWheelAngle;
+	};
+	
+	this.getECallInfo = function(){
+		return this.eCallInfo;
+	};
+	
+	this.getAirbagStatus = function(){
+		return this.airbagStatus;
+	};
+	
+	this.getEmergencyEvent = function(){
+		return this.emergencyEvent;
+	};
+	
+	this.getClusterModeStatus = function(){
+		return this.clusterModeStatus;
+	};
+	
+	this.getMyKey = function(){
+		return this.myKey;
+	};
+	
+	this.getSpeed = function(){
+		return this.speed;
+	};
+}
+UnsubscribeVehicleData.prototype = Object.create(RPCBase.prototype);
+factory.UnsubscribeVehicleData = UnsubscribeVehicleData;
+
+function GetVehicleData(){
+	RPCBase.call(this);
+	
+	this.functionName = "getVehicleData";
+	this.rpm = null;
+	this.externalTemperature = null;
+	this.fuelLevel = null;
+	this.prndl = null;
+	this.tirePressure = null;
+	this.engineTorque = null;
+	this.odometer = null;
+	this.gps = null;
+	this.fuelLevel_State = null;
+	this.instantFuelConsumption = null;
+	this.beltStatus = null;
+	this.bodyInformation = null;
+	this.deviceStatus = null;
+	this.driverBraking = null;
+	this.wiperStatus = null;
+	this.headLampStatus = null;
+	this.accPedalPosition = null;
+	this.steeringWheelAngle = null;
+	this.eCallInfo = null;
+	this.airbagStatus = null;
+	this.emergencyEvent = null;
+	this.clusterModeStatus = null;
+	this.myKey = null;
+	this.speed = null;
+	this.vin = null;
+	
+	this.setRpm = function(rpm){
+		this.rpm = rpm;
+	};
+	
+	this.setExternalTemperature = function(externalTemperature){
+		this.externalTemperature = externalTemperature;
+	};
+	
+	this.setFuelLevel = function(fuelLevel){
+		this.fuelLevel = fuelLevel;
+	};
+	
+	this.setPrndl = function(prndl){
+		this.prndl = prndl;
+	};
+	
+	this.setTirePressure = function(tirePressure){
+		this.tirePressure = tirePressure;
+	};
+	
+	this.setEngineTorque = function(engineTorque){
+		this.engineTorque = engineTorque;
+	};
+	
+	this.setOdometer = function(odometer){
+		this.odometer = odometer;
+	};
+	
+	this.setGps = function(gps){
+		this.gps = gps;
+	};
+	
+	this.setFuelLevel_State = function(fuelLevel_State){
+		this.fuelLevel_State = fuelLevel_State;
+	};
+	
+	this.setInstantFuelConsumption = function(instantFuelConsumption){
+		this.instantFuelConsumption = instantFuelConsumption;
+	};
+	
+	this.setBeltStatus = function(beltStatus){
+		this.beltStatus = beltStatus;
+	};
+	
+	this.setBodyInformation = function(bodyInformation){
+		this.bodyInformation = bodyInformation;
+	};
+	
+	this.setDeviceStatus = function(deviceStatus){
+		this.deviceStatus = deviceStatus;
+	};
+	
+	this.setDriverBraking = function(driverBraking){
+		this.driverBraking = driverBraking;
+	};
+	
+	this.setWiperStatus = function(wiperStatus){
+		this.wiperStatus = wiperStatus;
+	};
+	
+	this.setHeadLampStatus = function(headLampStatus){
+		this.headLampStatus = headLampStatus;
+	};
+	
+	this.setAccPedalPosition = function(accPedalPosition){
+		this.accPedalPosition = accPedalPosition;
+	};
+	
+	this.setSteeringWheelAngle = function(steeringWheelAngle){
+		this.steeringWheelAngle = steeringWheelAngle;
+	};
+	
+	this.setECallInfo = function(eCallInfo){
+		this.eCallInfo = eCallInfo;
+	};
+	
+	this.setAirbagStatus = function(airbagStatus){
+		this.airbagStatus = airbagStatus;
+	};
+	
+	this.setEmergencyEvent = function(emergencyEvent){
+		this.emergencyEvent = emergencyEvent;
+	};
+	
+	this.setClusterModeStatus = function(clusterModeStatus){
+		this.clusterModeStatus = clusterModeStatus;
+	};
+	
+	this.setMyKey = function(myKey){
+		this.myKey = myKey;
+	};
+	
+	this.setSpeed = function(speed){
+		this.speed = speed;
+	};
+	
+	this.setVin = function(vin){
+		this.vin = vin;
+	};
+	
+	this.getRpm = function(){
+		return this.rpm;
+	};
+	
+	this.getExternalTemperature = function(){
+		return this.externalTemperature;
+	};
+	
+	this.getFuelLevel = function(){
+		return this.fuelLevel;
+	};
+	
+	this.getPrndl = function(){
+		return this.prndl;
+	};
+	
+	this.getTirePressure = function(){
+		return this.tirePressure;
+	};
+	
+	this.getEngineTorque = function(){
+		return this.engineTorque;
+	};
+	
+	this.getOdometer = function(){
+		return this.odometer;
+	};
+	
+	this.getGps = function(){
+		return this.gps;
+	};
+	
+	this.getFuelLevel_State = function(){
+		return this.fuelLevel_State;
+	};
+	
+	this.getInstantFuelConsumption = function(){
+		return this.instantFuelConsumption;
+	};
+	
+	this.getBeltStatus = function(){
+		return this.beltStatus;
+	};
+	
+	this.getBodyInformation = function(){
+		return this.bodyInformation;
+	};
+	
+	this.getDeviceStatus = function(){
+		return this.deviceStatus;
+	};
+	
+	this.getDriverBraking = function(){
+		return this.driverBraking;
+	};
+	
+	this.getWiperStatus = function(){
+		return this.wiperStatus;
+	};
+	
+	this.getHeadLampStatus = function(){
+		return this.headLampStatus;
+	};
+	
+	this.getAccPedalPosition = function(){
+		return this.accPedalPosition;
+	};
+	
+	this.getSteeringWheelAngle = function(){
+		return this.steeringWheelAngle;
+	};
+	
+	this.getECallInfo = function(){
+		return this.eCallInfo;
+	};
+	
+	this.getAirbagStatus = function(){
+		return this.airbagStatus;
+	};
+	
+	this.getEmergencyEvent = function(){
+		return this.emergencyEvent;
+	};
+	
+	this.getClusterModeStatus = function(){
+		return this.clusterModeStatus;
+	};
+	
+	this.getMyKey = function(){
+		return this.myKey;
+	};
+	
+	this.getSpeed = function(){
+		return this.speed;
+	};
+	
+	this.getVin = function(){
+		return this.vin;
+	};
+}
+GetVehicleData.prototype = Object.create(RPCBase.prototype);
+factory.GetVehicleData = GetVehicleData;
+
+function ScrollableMessage(){
+	RPCBase.call(this);
+	
+	this.functionName = "scrollableMessage";
+	this.scrollableMessageBody = null;
+	this.timeout = null;
+	this.softButtons = null;
+	
+	this.setScrollableMessageBody = function(scrollableMessageBody){
+		this.scrollableMessageBody = scrollableMessageBody;
+	};
+	
+	this.setTimeout = function(timeout){
+		this.timeout = timeout;
+	};
+	
+	this.setSoftButtons = function(softButtonArray){
+		this.softButtons = softButtonArray ? SdlCordova.toArray(softButtonArray) : null;
+	};
+	
+	this.addSoftButton = function(button){
+		if(this.softButtons == null)
+			this.softButtons = [button];
+		else
+			this.softButtons.push(button);
+	};
+	
+	this.getScrollableMessageBody = function(){
+		return this.scrollableMessageBody;
+	};
+	
+	this.getTimeout = function(){
+		return this.timeout;
+	};
+	
+	this.getSoftButtons = function(){
+		return this.softButtons;
+	};
+
+}
+ScrollableMessage.prototype = Object.create(RPCBase.prototype);
+factory.ScrollableMessage = ScrollableMessage;
+
+function ChangeRegistration(){
+	RPCBase.call(this);
+	
+	this.functionName = "changeRegistration";
+	this.language = null;
+    this.hmiDisplayLanguage = null;
+    this.appName = null;
+    this.ttsName = null;
+    this.ngnMediaScreenAppName = null;
+    this.vrSynonyms = null;
+	
+	this.setLanguage = function(language){
+		this.language = language;
+	};
+	
+	this.setHmiDisplayLanguage = function(hmiDisplayLanguage){
+		this.hmiDisplayLanguage = hmiDisplayLanguage;
+	};
+	
+	this.setAppName = function(appName){
+		this.appName = appName;
+	};
+	
+	this.setTtsName = function (ttsChunkArray){
+		this.ttsName = ttsChunkArray ? SdlCordova.toArray(ttsChunkArray) : null;
+	};
+	
+	this.addTTSChunk = function(chunk){
+		if(this.ttsName == null){
+			this.ttsName = [chunk];
+		}else{
+			this.ttsName.push(chunk);
+		}		
+	};
+	
+	this.setNgnMediaScreenAppName = function(ngnMediaScreenAppName){
+		this.ngnMediaScreenAppName = ngnMediaScreenAppName;
+	};
+	
+	this.setVrSynonyms = function(vrSynonymsArray){
+		this.vrSynonyms = vrSynonymsArray ? SdlCordova.toArray(vrSynonymsArray) : null;
+	};
+	
+	this.addVrSynonyms = function(vrSynonyms){
+		if(this.vrSynonyms == null){
+			this.vrSynonyms = [vrSynonyms];
+		}else{
+			this.vrSynonyms.push(vrSynonyms);
+		}		
+	};
+	
+	this.getLanguage = function(){
+		return this.language;
+	};
+	
+	this.getHmiDisplayLanguage = function(){
+		return this.hmiDisplayLanguage;
+	};
+	
+	this.getAppName = function(){
+		return this.appName;
+	};
+	
+	this.getTtsName = function (){
+		return this.ttsName;
+	};
+	
+	this.getNgnMediaScreenAppName = function(){
+		return this.ngnMediaScreenAppName;
+	};
+	
+	this.getVrSynonyms = function(){
+		return this.vrSynonyms;
+	};
+}
+ChangeRegistration.prototype = Object.create(RPCBase.prototype);
+factory.ChangeRegistration = ChangeRegistration;
+
+function SetAppIcon(){
+	RPCBase.call(this);
+	
+	this.functionName = "setAppIcon";
+	this.sdlFileName = null;
+	
+	this.setSdlFileName = function(sdlFileName){
+		this.sdlFileName = sdlFileName;
+	};
+	
+	this.getSdlFileName = function(){
+		return this.sdlFileName;
+	};
+}
+SetAppIcon.prototype = Object.create(RPCBase.prototype);
+factory.SetAppIcon = SetAppIcon;
+
+function SetDisplayLayout(){
+	RPCBase.call(this);
+	
+	this.functionName = "setDisplayLayout";
+	this.displayLayout = null;
+	
+	this.setDisplayLayout = function(displayLayout){
+		this.displayLayout = displayLayout;
+	};
+	
+	this.getDisplayLayout = function(){
+		return this.displayLayout;
+	};
+}
+SetDisplayLayout.prototype = Object.create(RPCBase.prototype);
+factory.SetDisplayLayout = SetDisplayLayout;
+
+function GetDTCs(){
+	RPCBase.call(this);
+	
+	this.functionName = "getDTCs";
+	this.dtcMask = null;
+	this.ecuName = null;
+	
+	this.setDtcMask = function(dtcMask){
+		this.dtcMask = dtcMask;
+	};
+	
+	this.setEcuName = function(ecuName){
+		this.ecuName = ecuName;
+	};
+	
+	this.getDtcMask = function(){
+		return this.dtcMask;
+	};
+	
+	this.getEcuName = function(){
+		return this.ecuName;
+	};
+}
+GetDTCs.prototype = Object.create(RPCBase.prototype);
+factory.GetDTCs = GetDTCs;
+
+function Slider(){
+	RPCBase.call(this);
+	
+	this.functionName = "slider";
+	this.numTicks = null;
+	this.sliderHeader = null;
+	this.sliderFooter = null; //array
+	this.position = null;
+	this.timeout = null;
+	
+	this.setNumTicks = function(numTicks){
+		this.numTicks = numTicks;
+	};
+	
+	this.setSliderHeader = function(sliderHeader){
+		this.sliderHeader = sliderHeader;
+	};
+	
+	/*this.setSliderFooter = function(sliderFooter){
+		this.sliderFooter = sliderFooter;
+	};*/
+	this.setSliderFooter = function(sliderFooterArray){
+		this.sliderFooter = sliderFooterArray ? SdlCordova.toArray(sliderFooterArray) : null;
+	};
+	
+	this.addSliderFooter = function(footer){
+		if(this.sliderFooter == null)
+			this.sliderFooter = [footer];
+		else
+			this.sliderFooter.push(footer);
+	};
+	
+	this.setPosition = function(position){
+		this.position = position;
+	};
+	
+	this.setTimeout = function(timeout){
+		this.timeout = timeout;
+	};
+	
+	this.getNumTicks = function(){
+		return this.numTicks;
+	};
+	
+	this.getSliderHeader = function(){
+		return this.sliderHeader;
+	};
+	
+	this.getSliderFooter = function(){
+		return this.sliderFooter;
+	};
+	
+	this.getPosition = function(){
+		return this.position;
+	};
+	
+	this.getTimeout = function(){
+		return this.timeout;
+	};
+	
+}
+Slider.prototype = Object.create(RPCBase.prototype);
+factory.Slider = Slider;
+
 // end added
 function isValidTTSChunkType(type){
 	switch(type){
@@ -937,36 +2045,37 @@ function onChoiceId(choiceId, f){
 }
 factory.onChoiceId = onChoiceId;
 
-function onButtonEvent(btnId, f){
+function onButtonEvent(customButtonID, f){
 	if(f == null){
-		delete buttonEventListeners[btnId];
+		delete buttonEventListeners[customButtonID];
 		return;
 	}
 	
-	if(buttonEventListeners[btnId])
-		buttonEventListeners[btnId].push(f);
+	if(buttonEventListeners[customButtonID])
+		buttonEventListeners[customButtonID].push(f);
 	else
-		buttonEventListeners[btnId] = [f];
+		buttonEventListeners[customButtonID] = [f];
 }
 factory.onButtonEvent = onButtonEvent;
 
-function onButtonPress(btnId, f){
+function onButtonPress(customButtonID, f){
 	if(f == null){
-		delete buttonPressesListeners[btnId];
+		delete buttonPressesListeners[customButtonID];
 		return;
 	}
 	
-	if(buttonPressesListeners[btnId])
-		buttonPressesListeners[btnId].push(f);
+	if(buttonPressesListeners[customButtonID])
+		buttonPressesListeners[customButtonID].push(f);
 	else
-		buttonPressesListeners[btnId] = [f];
+		buttonPressesListeners[customButtonID] = [f];
 }
 factory.onButtonPress = onButtonPress;
 //end 
 
 function proxyListener(info){ //unfinished 
 	var fs = null;
-	console.log("inside proxy listener");
+	console.log("ProxyListner: "+info.FunctionName);
+	console.log("Info detail: "+info);
 	if((fs = onCorrelationIdListeners[info.CorrelationID])){
 		for(var i = 0; i < fs.length; i++){
 			fs[i](info);
@@ -982,6 +2091,36 @@ function proxyListener(info){ //unfinished
 				fs[i](info);
 			}
 		}			
+	}
+	
+	if(info.FunctionName.indexOf("onChoice")>0){
+		var choiceId = info.JSONData.choiceId;
+		var fs = null;
+		if((fs = onChoiceIdListeners[choiceId])){
+			for(var i = 0; i < fs.length; i++){
+				fs[i](info);
+			}
+		}		
+	}
+	
+	if(info.FunctionName =="OnButtonEvent"){
+		var customButtonID = info.JSONData.customButtonID;
+		var fs = null;
+		if((fs = buttonEventListeners[customButtonID])){
+			for(var i = 0; i < fs.length; i++){
+				fs[i](info);
+			}
+		}		
+	}
+	
+	if(info.FunctionName =="OnButtonPress"){
+		var customButtonID = info.JSONData.customButtonID;
+		var fs = null;
+		if((fs = buttonPressesListeners[customButtonID])){
+			for(var i = 0; i < fs.length; i++){
+				fs[i](info);
+			}
+		}		
 	}
 }
 factory.proxyListener = proxyListener;
@@ -1019,3 +2158,16 @@ SdlCordova.onProxyFirstAccess(proxyListener);
 SdlCordova.onPutFileResponse(proxyListener);
 SdlCordova.onDeleteFileResponse(proxyListener);
 SdlCordova.onListFilesResponse(proxyListener);
+SdlCordova.onPerformAudioPassThruResponse(proxyListener);
+SdlCordova.onOnAudioPassThru(proxyListener);
+SdlCordova.onEndAudioPassThruResponse(proxyListener);
+SdlCordova.onSubscribeVehicleDataResponse(proxyListener);
+SdlCordova.onUnsubscribeVehicleDataResponse(proxyListener);
+SdlCordova.onOnVehicleData(proxyListener);
+SdlCordova.onGetVehicleDataResponse(proxyListener);
+SdlCordova.onScrollableMessageResponse(proxyListener);
+SdlCordova.onChangeRegistrationResponse(proxyListener);
+SdlCordova.onSetAppIconResponse(proxyListener);
+SdlCordova.onSetDisplayLayoutResponse(proxyListener);
+SdlCordova.onGetDTCsResponse(proxyListener);
+SdlCordova.onSliderResponse(proxyListener);

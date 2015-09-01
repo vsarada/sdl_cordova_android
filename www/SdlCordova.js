@@ -141,6 +141,7 @@ var SdlCordova = {
 	
 	iProxyListenerCallback: function(json){
 		console.log("iProxyListenerCallback is being called");
+		console.log("JSON: " + json);
 		/* NOTE: This function is not called within the context of this object */
 		if(SdlCordova.createProxySuccess != null)
 		{			
@@ -152,8 +153,7 @@ var SdlCordova = {
 		}
 		//console.log("The Message type is a " + json.MessageType);
 		//console.log("The hmiLevel is " + json.JSONData.hmiLevel);
-		
-	  	console.log(json.FunctionName);
+		console.log(json.FunctionName);
 		var funToRun = json.FunctionName;
 		if (funToRun == "OnHMIStatus"){
 			console.log("printing out HMI Level: " + json.JSONData.hmiLevel);
@@ -302,6 +302,9 @@ var SdlCordova = {
 		}
 		if(opts.playTone){
 			rpcRequestParams[SdlCordova.names.playTone] = opts.playTone;
+		}
+		if(opts.softButtons){
+			rpcRequestParams[SdlCordova.names.softButtons] = this.toArray(opts.softButtons);
 		}
 		
 		// Build the request
@@ -522,7 +525,63 @@ var SdlCordova = {
 	
 	performAudioPassThru: function(correlationId, opts){
 		opts = this.extend(opts, SdlCordova.defaultOpts);
-		//needs work
+		
+		var rpcRequestParams = {};
+		
+		if(opts.maxDuration){
+			rpcRequestParams[SdlCordova.names.maxDuration] = Number(opts.maxDuration);
+		}
+		if(opts.audioPassThruDisplayText1){
+			rpcRequestParams[SdlCordova.names.audioPassThruDisplayText1] = opts.audioPassThruDisplayText1;
+		}
+		if(opts.audioPassThruDisplayText2){
+			rpcRequestParams[SdlCordova.names.audioPassThruDisplayText2] = opts.audioPassThruDisplayText2;
+		}
+		if(opts.muteAudio){
+			rpcRequestParams[SdlCordova.names.muteAudio] = opts.muteAudio;
+		}
+		if(opts.samplingRate){
+			rpcRequestParams[SdlCordova.names.samplingRate] = opts.samplingRate;
+		}
+		if(opts.audioType){
+			rpcRequestParams[SdlCordova.names.audioType] = opts.audioType;
+		}
+		if(opts.initialPrompt){
+			rpcRequestParams[SdlCordova.names.initialPrompt] = this.toArray(opts.initialPrompt);
+		}
+		if(opts.bitsPerSample){
+			rpcRequestParams[SdlCordova.names.bitsPerSample] = opts.bitsPerSample;
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_performAudioPassThru;
+		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+		
+	},
+	
+	endAudioPassThru: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		//added
+		var rpcRequestParams = {};
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_endAudioPassThru;
+		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
 	},
 	
 	putFile: function(correlationId, opts){
@@ -573,15 +632,18 @@ var SdlCordova = {
 	resetGlobalProperties: function(correlationId, opts){
 		opts = this.extend(opts, SdlCordova.defaultOpts);
 		
-		var rpcRequest = {};
+		var rpcRequestParams = {};
 		
 		if(opts.properties){
-			rpcRequest[SdlCordova.names.properties] = this.toArray(opts.properties);
+			rpcRequestParams[SdlCordova.names.properties] = this.toArray(opts.properties);
 		}
 		
-		// Build the request		
+		// Build the request
+		var rpcRequest = {};		
 		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_resetGlobalProperties;
 		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+
 		
 		// Build the message
 		var rpcMessage = {};
@@ -592,12 +654,48 @@ var SdlCordova = {
 	
 	setAppIcon: function(correlationId, opts){
 		opts = this.extend(opts, SdlCordova.defaultOpts);
-		//needs work
+		
+		var rpcRequestParams = {};
+		
+		if(opts.sdlFileName){
+			rpcRequestParams[SdlCordova.names.sdlFileName] = opts.sdlFileName;
+		}
+		
+		// Build the request
+		var rpcRequest = {};		
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_setAppIcon;
+		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
 	},
 	
 	setDisplayLayout: function(correlationId, opts){
 		opts = this.extend(opts, SdlCordova.defaultOpts);
-		//needs work
+		
+		var rpcRequestParams = {};
+		
+		if(opts.displayLayout){
+			rpcRequestParams[SdlCordova.names.displayLayout] = opts.displayLayout;
+		}
+		
+		// Build the request
+		var rpcRequest = {};		
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_setDisplayLayout;
+		rpcRequest[SdlCordova.names.correlationID] = correlationId;
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
 	},
 		
 	setGlobalProperties: function(correlationId, opts){
@@ -605,19 +703,25 @@ var SdlCordova = {
 		
 		var rpcRequestParams = {};
 		
-		if(opts.helpPromptTTSText){
+		/*if(opts.helpPromptTTSText){
 			var ttsChunk = new SdlCordova.TTSChunk(SdlCordova.names.speechCapabilities_TEXT, opts.helpPromptTTSText);
 			rpcRequestParams[SdlCordova.names.helpPrompt] = [ttsChunk];		// Array of TTSChunks
-		}
+		}*/
 		if(opts.helpPromptTTSChunks){
 			rpcRequestParams[SdlCordova.names.helpPrompt] = this.toArray(opts.helpPromptTTSChunks);
 		}
-		if(opts.timeoutPromptTTSText){
+		/*if(opts.timeoutPromptTTSText){
 			var ttsChunk = new SdlCordova.TTSChunk(SdlCordova.names.speechCapabilities_TEXT, opts.timeoutPromptTTSText);
 			rpcRequestParams[SdlCordova.names.timeoutPrompt] = [ttsChunk];		// Array of TTSChunks
-		}
+		}*/
 		if(opts.timeoutPromptTTSChunks){
 			rpcRequestParams[SdlCordova.names.timeoutPrompt] = this.toArray(opts.timeoutPromptTTSChunks);
+		}
+		if(opts.vrHelpTitle){
+			rpcRequestParams[SdlCordova.names.vrHelpTitle] = opts.vrHelpTitle;
+		}
+		if(opts.vrHelp){
+			rpcRequestParams[SdlCordova.names.vrHelp] = this.toArray(opts.vrHelp);
 		}
 		
 		// Build the request
@@ -694,6 +798,15 @@ var SdlCordova = {
 		}
 		if(opts.mediaTrack){
 			rpcRequestParams[SdlCordova.names.mediaTrack] = opts.mediaTrack;
+		}
+		if(opts.softButtons){
+			rpcRequestParams[SdlCordova.names.softButtons] = this.toArray(opts.softButtons);
+		}
+		if(opts.graphic){
+			rpcRequestParams[SdlCordova.names.graphic] = opts.graphic;
+		}
+		if(opts.customPresets){
+			rpcRequestParams[SdlCordova.names.customPresets] = this.toArray(opts.customPresets);
 		}
 	
 		// Build the request
@@ -773,6 +886,418 @@ var SdlCordova = {
 		// Build the request
 		var rpcRequest = {};
 		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_unsubscribeButton;
+		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+	},
+	
+	// added
+	subscribeVehicleData: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		// Build the request params
+		var rpcRequestParams = {};
+		
+		if(opts.rpm){
+			rpcRequestParams[SdlCordova.names.rpm] = opts.rpm;
+		}
+		if(opts.externalTemperature){
+			rpcRequestParams[SdlCordova.names.externalTemperature] = opts.externalTemperature;
+		}
+		if(opts.fuelLevel){
+			rpcRequestParams[SdlCordova.names.fuelLevel] = opts.fuelLevel;
+		}
+		if(opts.prndl){
+			rpcRequestParams[SdlCordova.names.prndl] = opts.prndl;
+		}
+		if(opts.tirePressure){
+			rpcRequestParams[SdlCordova.names.tirePressure] = opts.tirePressure;
+		}
+		if(opts.engineTorque){
+			rpcRequestParams[SdlCordova.names.engineTorque] = opts.engineTorque;
+		}
+		if(opts.odometer){
+			rpcRequestParams[SdlCordova.names.odometer] = opts.odometer;
+		}
+		if(opts.gps){
+			rpcRequestParams[SdlCordova.names.gps] = opts.gps;
+		}
+		if(opts.fuelLevel_State){
+			rpcRequestParams[SdlCordova.names.fuelLevel_State] = opts.fuelLevel_State;
+		}
+		if(opts.instantFuelConsumption){
+			rpcRequestParams[SdlCordova.names.instantFuelConsumption] = opts.instantFuelConsumption;
+		}
+		if(opts.beltStatus){
+			rpcRequestParams[SdlCordova.names.beltStatus] = opts.beltStatus;
+		}
+		if(opts.bodyInformation){
+			rpcRequestParams[SdlCordova.names.bodyInformation] = opts.bodyInformation;
+		}
+		if(opts.deviceStatus){
+			rpcRequestParams[SdlCordova.names.deviceStatus] = opts.deviceStatus;
+		}
+		if(opts.driverBraking){
+			rpcRequestParams[SdlCordova.names.driverBraking] = opts.driverBraking;
+		}
+		if(opts.wiperStatus){
+			rpcRequestParams[SdlCordova.names.wiperStatus] = opts.wiperStatus;
+		}
+		if(opts.headLampStatus){
+			rpcRequestParams[SdlCordova.names.headLampStatus] = opts.headLampStatus;
+		}
+		if(opts.accPedalPosition){
+			rpcRequestParams[SdlCordova.names.accPedalPosition] = opts.accPedalPosition;
+		}
+		if(opts.steeringWheelAngle){
+			rpcRequestParams[SdlCordova.names.steeringWheelAngle] = opts.steeringWheelAngle;
+		}
+		if(opts.eCallInfo){
+			rpcRequestParams[SdlCordova.names.eCallInfo] = opts.eCallInfo;
+		}
+		if(opts.airbagStatus){
+			rpcRequestParams[SdlCordova.names.airbagStatus] = opts.airbagStatus;
+		}
+		if(opts.emergencyEvent){
+			rpcRequestParams[SdlCordova.names.emergencyEvent] = opts.emergencyEvent;
+		}
+		if(opts.clusterModeStatus){
+			rpcRequestParams[SdlCordova.names.clusterModeStatus] = opts.clusterModeStatus;
+		}
+		if(opts.myKey){
+			rpcRequestParams[SdlCordova.names.myKey] = opts.myKey;
+		}
+		if(opts.speed){
+			rpcRequestParams[SdlCordova.names.speed] = opts.speed;
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_subscribeVehicleData;
+		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+		
+	},
+	
+	unsubscribeVehicleData: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		// Build the request params
+		var rpcRequestParams = {};
+		
+		if(opts.rpm){
+			rpcRequestParams[SdlCordova.names.rpm] = opts.rpm;
+		}
+		if(opts.externalTemperature){
+			rpcRequestParams[SdlCordova.names.externalTemperature] = opts.externalTemperature;
+		}
+		if(opts.fuelLevel){
+			rpcRequestParams[SdlCordova.names.fuelLevel] = opts.fuelLevel;
+		}
+		if(opts.prndl){
+			rpcRequestParams[SdlCordova.names.prndl] = opts.prndl;
+		}
+		if(opts.tirePressure){
+			rpcRequestParams[SdlCordova.names.tirePressure] = opts.tirePressure;
+		}
+		if(opts.engineTorque){
+			rpcRequestParams[SdlCordova.names.engineTorque] = opts.engineTorque;
+		}
+		if(opts.odometer){
+			rpcRequestParams[SdlCordova.names.odometer] = opts.odometer;
+		}
+		if(opts.gps){
+			rpcRequestParams[SdlCordova.names.gps] = opts.gps;
+		}
+		if(opts.fuelLevel_State){
+			rpcRequestParams[SdlCordova.names.fuelLevel_State] = opts.fuelLevel_State;
+		}
+		if(opts.instantFuelConsumption){
+			rpcRequestParams[SdlCordova.names.instantFuelConsumption] = opts.instantFuelConsumption;
+		}
+		if(opts.beltStatus){
+			rpcRequestParams[SdlCordova.names.beltStatus] = opts.beltStatus;
+		}
+		if(opts.bodyInformation){
+			rpcRequestParams[SdlCordova.names.bodyInformation] = opts.bodyInformation;
+		}
+		if(opts.deviceStatus){
+			rpcRequestParams[SdlCordova.names.deviceStatus] = opts.deviceStatus;
+		}
+		if(opts.driverBraking){
+			rpcRequestParams[SdlCordova.names.driverBraking] = opts.driverBraking;
+		}
+		if(opts.wiperStatus){
+			rpcRequestParams[SdlCordova.names.wiperStatus] = opts.wiperStatus;
+		}
+		if(opts.headLampStatus){
+			rpcRequestParams[SdlCordova.names.headLampStatus] = opts.headLampStatus;
+		}
+		if(opts.accPedalPosition){
+			rpcRequestParams[SdlCordova.names.accPedalPosition] = opts.accPedalPosition;
+		}
+		if(opts.steeringWheelAngle){
+			rpcRequestParams[SdlCordova.names.steeringWheelAngle] = opts.steeringWheelAngle;
+		}
+		if(opts.eCallInfo){
+			rpcRequestParams[SdlCordova.names.eCallInfo] = opts.eCallInfo;
+		}
+		if(opts.airbagStatus){
+			rpcRequestParams[SdlCordova.names.airbagStatus] = opts.airbagStatus;
+		}
+		if(opts.emergencyEvent){
+			rpcRequestParams[SdlCordova.names.emergencyEvent] = opts.emergencyEvent;
+		}
+		if(opts.clusterModeStatus){
+			rpcRequestParams[SdlCordova.names.clusterModeStatus] = opts.clusterModeStatus;
+		}
+		if(opts.myKey){
+			rpcRequestParams[SdlCordova.names.myKey] = opts.myKey;
+		}
+		if(opts.speed){
+			rpcRequestParams[SdlCordova.names.speed] = opts.speed;
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_unsubscribeVehicleData;
+		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+	},
+	
+	getVehicleData: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		// Build the request params
+		var rpcRequestParams = {};
+		
+		if(opts.rpm){
+			rpcRequestParams[SdlCordova.names.rpm] = opts.rpm;
+		}
+		if(opts.externalTemperature){
+			rpcRequestParams[SdlCordova.names.externalTemperature] = opts.externalTemperature;
+		}
+		if(opts.fuelLevel){
+			rpcRequestParams[SdlCordova.names.fuelLevel] = opts.fuelLevel;
+		}
+		if(opts.prndl){
+			rpcRequestParams[SdlCordova.names.prndl] = opts.prndl;
+		}
+		if(opts.tirePressure){
+			rpcRequestParams[SdlCordova.names.tirePressure] = opts.tirePressure;
+		}
+		if(opts.engineTorque){
+			rpcRequestParams[SdlCordova.names.engineTorque] = opts.engineTorque;
+		}
+		if(opts.odometer){
+			rpcRequestParams[SdlCordova.names.odometer] = opts.odometer;
+		}
+		if(opts.gps){
+			rpcRequestParams[SdlCordova.names.gps] = opts.gps;
+		}
+		if(opts.fuelLevel_State){
+			rpcRequestParams[SdlCordova.names.fuelLevel_State] = opts.fuelLevel_State;
+		}
+		if(opts.instantFuelConsumption){
+			rpcRequestParams[SdlCordova.names.instantFuelConsumption] = opts.instantFuelConsumption;
+		}
+		if(opts.beltStatus){
+			rpcRequestParams[SdlCordova.names.beltStatus] = opts.beltStatus;
+		}
+		if(opts.bodyInformation){
+			rpcRequestParams[SdlCordova.names.bodyInformation] = opts.bodyInformation;
+		}
+		if(opts.deviceStatus){
+			rpcRequestParams[SdlCordova.names.deviceStatus] = opts.deviceStatus;
+		}
+		if(opts.driverBraking){
+			rpcRequestParams[SdlCordova.names.driverBraking] = opts.driverBraking;
+		}
+		if(opts.wiperStatus){
+			rpcRequestParams[SdlCordova.names.wiperStatus] = opts.wiperStatus;
+		}
+		if(opts.headLampStatus){
+			rpcRequestParams[SdlCordova.names.headLampStatus] = opts.headLampStatus;
+		}
+		if(opts.accPedalPosition){
+			rpcRequestParams[SdlCordova.names.accPedalPosition] = opts.accPedalPosition;
+		}
+		if(opts.steeringWheelAngle){
+			rpcRequestParams[SdlCordova.names.steeringWheelAngle] = opts.steeringWheelAngle;
+		}
+		if(opts.eCallInfo){
+			rpcRequestParams[SdlCordova.names.eCallInfo] = opts.eCallInfo;
+		}
+		if(opts.airbagStatus){
+			rpcRequestParams[SdlCordova.names.airbagStatus] = opts.airbagStatus;
+		}
+		if(opts.emergencyEvent){
+			rpcRequestParams[SdlCordova.names.emergencyEvent] = opts.emergencyEvent;
+		}
+		if(opts.clusterModeStatus){
+			rpcRequestParams[SdlCordova.names.clusterModeStatus] = opts.clusterModeStatus;
+		}
+		if(opts.myKey){
+			rpcRequestParams[SdlCordova.names.myKey] = opts.myKey;
+		}
+		if(opts.speed){
+			rpcRequestParams[SdlCordova.names.speed] = opts.speed;
+		}
+		if(opts.vin){
+			rpcRequestParams[SdlCordova.names.vin] = opts.vin;
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_getVehicleData;
+		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+	},
+	
+	scrollableMessage: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		// Build the request params
+		var rpcRequestParams = {};
+		
+		if(opts.scrollableMessageBody){
+			rpcRequestParams[SdlCordova.names.scrollableMessageBody] = opts.scrollableMessageBody;
+		}
+		if(opts.timeout){
+			rpcRequestParams[SdlCordova.names.timeout] = Number(opts.timeout);
+		}
+		if(opts.softButtons){
+			rpcRequestParams[SdlCordova.names.softButtons] = this.toArray(opts.softButtons);
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_scrollableMessage;
+		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+	},
+	
+	changeRegistration: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		// Build the request params
+		var rpcRequestParams = {};
+		
+		if(opts.language){
+			rpcRequestParams[SdlCordova.names.language] = opts.language;
+		}
+		if(opts.hmiDisplayLanguage){
+			rpcRequestParams[SdlCordova.names.hmiDisplayLanguage] = opts.hmiDisplayLanguage;
+		}
+		if(opts.appName){
+			rpcRequestParams[SdlCordova.names.appName] = opts.appName;
+		}
+		if(opts.ttsName){
+			rpcRequestParams[SdlCordova.names.ttsName] = this.toArray(opts.ttsName);
+		}
+		if(opts.ngnMediaScreenAppName){
+			rpcRequestParams[SdlCordova.names.ngnMediaScreenAppName] = opts.ngnMediaScreenAppName;
+		}
+		if(opts.vrSynonyms){
+			rpcRequestParams[SdlCordova.names.vrSynonyms] = this.toArray(opts.vrSynonyms);
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_changeRegistration;
+		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+	},
+	
+	getDTCs: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		// Build the request params
+		var rpcRequestParams = {};
+		
+		if(opts.dtcMask){
+			rpcRequestParams[SdlCordova.names.dtcMask] = Number(opts.dtcMask);
+		}
+		if(opts.ecuName){
+			rpcRequestParams[SdlCordova.names.ecuName] = Number(opts.ecuName);
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_getDTCs;
+		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
+		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
+		
+		// Build the message
+		var rpcMessage = {};
+		rpcMessage[SdlCordova.names.messageTypeRequest] = rpcRequest;
+		
+		return this.sendRPCRequest(opts, rpcMessage);
+	},
+	
+	slider: function(correlationId, opts){
+		opts = this.extend(opts, SdlCordova.defaultOpts);
+		
+		// Build the request params
+		var rpcRequestParams = {};
+		
+		if(opts.numTicks){
+			rpcRequestParams[SdlCordova.names.numTicks] = Number(opts.numTicks);
+		}
+		if(opts.sliderHeader){
+			rpcRequestParams[SdlCordova.names.sliderHeader] = opts.sliderHeader;
+		}
+		if(opts.sliderFooter){
+			rpcRequestParams[SdlCordova.names.sliderFooter] = this.toArray(opts.sliderFooter);
+		}
+		if(opts.position){
+			rpcRequestParams[SdlCordova.names.position] = Number(opts.position);
+		}
+		if(opts.timeout){
+			rpcRequestParams[SdlCordova.names.timeout] = Number(opts.timeout);
+		}
+		
+		// Build the request
+		var rpcRequest = {};
+		rpcRequest[SdlCordova.names.function_name] = SdlCordova.names.function_name_slider;
 		rpcRequest[SdlCordova.names.correlationID] = Number(correlationId);
 		rpcRequest[SdlCordova.names.parameters] = rpcRequestParams;
 		
@@ -926,6 +1451,10 @@ var SdlCordova = {
 		this.bind(SdlCordova.names.function_name_performAudioPassThru,f);
 	},
 	
+	onEndAudioPassThruResponse: function(f){
+		this.bind(SdlCordova.names.function_name_endAudioPassThru,f);
+	},
+	
 	onPerformInteractionResponse: function(f){
 		this.bind(SdlCordova.names.function_name_performInteraction, f);
 	},
@@ -977,7 +1506,37 @@ var SdlCordova = {
 	onUnsubscribeButtonResponse: function(f){
 		this.bind(SdlCordova.names.function_name_unsubscribeButton, f);
 	},
-
+	
+	//added
+	onSubscribeVehicleDataResponse: function(f){
+		this.bind(SdlCordova.names.function_name_subscribeVehicleData, f);
+	},
+	
+	onUnsubscribeVehicleDataResponse: function(f){
+		this.bind(SdlCordova.names.function_name_unsubscribeVehicleData, f);
+	},
+	
+	onGetVehicleDataResponse: function(f){
+		this.bind(SdlCordova.names.function_name_getVehicleData, f);
+	},
+	
+	onScrollableMessageResponse: function(f){
+		this.bind(SdlCordova.names.function_name_scrollableMessage, f);
+	},
+	
+	onChangeRegistrationResponse: function(f){
+		this.bind(SdlCordova.names.function_name_changeRegistration, f);
+	},
+	
+	onGetDTCsResponse: function(f){
+		this.bind(SdlCordova.names.function_name_getDTCs, f);
+	},
+	
+	onSliderResponse: function(f){
+		this.bind(SdlCordova.names.function_name_slider, f);
+	},
+	//end
+	
 	onOnButtonEvent: function(f){
 		this.bind(SdlCordova.names.RPC_NOTIFICATION_onButtonEvent, f);
 	},
@@ -1013,7 +1572,17 @@ var SdlCordova = {
 	onOnAppInterfaceUnregistered: function(f){
 		this.bind(SdlCordova.names.RPC_NOTIFICATION_onAppInterfaceUnregistered, f);
 	},
-
+	
+	//added
+	onOnVehicleData: function(f){
+		console.log("in onVehicleData");
+		this.bind(SdlCordova.names.RPC_NOTIFICATION_onVehicleData, f);
+	},
+	onOnAudioPassThru: function(f){
+		console.log("In onAudioPassThru");
+		this.bind(SdlCordova.names.RPC_NOTIFICATION_onAudioPassThru, f);
+	},
+	//end add
 	onGenericResponse: function(f){
 		this.bind(SdlCordova.names.function_name_genericResponse, f);
 	},
@@ -1046,16 +1615,22 @@ Choice: function(choiceId, menuName, vrCommands){
 Image: function(value, imageType){
 	this[SdlCordova.names.value] = value;
 	this[SdlCordova.names.imageType] = imageType;
-}
+},
 
-/*SoftButton: function(isHighlighted, softButtonID, systemAction, text, softButtonType){
+SoftButton: function(isHighlighted, softButtonID, systemAction, text, softButtonType, image){
 	this[SdlCordova.names.isHighlighted] = isHighlighted;
 	this[SdlCordova.names.softButtonID] = softButtonID;
 	this[SdlCordova.names.systemAction] = systemAction;
 	this[SdlCordova.names.text] = text;
 	this[SdlCordova.names.type] = softButtonType ;
 	this[SdlCordova.names.image] = image;
-}*/
+},
+
+VrHelpItem: function(position, text, image){
+	this[SdlCordova.names.position] = position;
+	this[SdlCordova.names.text] = text;
+	this[SdlCordova.names.image] = image;
+}
 };
 
 // Define Static Variables
@@ -1128,6 +1703,7 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.alertText3 = "alertText3"; //added
 	SdlCordova.names.duration = "duration";
 	SdlCordova.names.playTone = "playTone";
+	SdlCordova.names.softButtons = "softButtons"; //added
 	
 	//SoftButton 
 	SdlCordova.names.isHighlighted = "isHighlighted";
@@ -1180,6 +1756,8 @@ SdlCordova.names.correlationID = "correlationID";
 	// SetGlobalProperties
 	//SdlCordova.names.helpPrompt = "helpPrompt";
 	//SdlCordova.names.timeoutPrompt = "timeoutPrompt";
+	SdlCordova.names.vrHelpTitle = "vrHelpTitle";
+	SdlCordova.names.vrHelp = "vrHelp";
 	
 	// ResetGlobalProperties
 	SdlCordova.names.properties = "properties";
@@ -1220,6 +1798,8 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.statusBar = "statusBar";
 	SdlCordova.names.mediaClock = "mediaClock";
 	SdlCordova.names.mediaTrack = "mediaTrack";
+	SdlCordova.names.graphic = "graphic";
+	SdlCordova.names.customPresets = "customPresets";
 	
 	// Speak	
 	//SdlCordova.ttsText = "ttsText";	
@@ -1266,6 +1846,7 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.function_name_createInteractionChoiceSet = "CreateInteractionChoiceSet";	
 	SdlCordova.names.function_name_deleteInteractionChoiceSet = "DeleteInteractionChoiceSet";
 	SdlCordova.names.function_name_performAudioPassThru = "PerformAudioPassThru";
+	SdlCordova.names.function_name_endAudioPassThru = "EndAudioPassThru";
 	SdlCordova.names.function_name_performInteraction = "PerformInteraction";	
 	SdlCordova.names.function_name_registerAppInterface = "RegisterAppInterface";
 	SdlCordova.names.function_name_unregisterAppInterface = "UnregisterAppInterface";
@@ -1290,6 +1871,9 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.function_name_getVehicleData = "GetVehicleData";
 	SdlCordova.names.function_name_resetGlobalProperties = "ResetGlobalProperties";
 	SdlCordova.names.function_name_performAudioCapture = "PerformAudioCapture";
+	SdlCordova.names.function_name_scrollableMessage = "ScrollableMessage";
+	SdlCordova.names.function_name_changeRegistration = "ChangeRegistration";
+	SdlCordova.names.function_name_slider = "Slider";
 	
 	// Notifications
 	SdlCordova.names.RPC_NOTIFICATION_onCommand = "OnCommand";
@@ -1301,6 +1885,8 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.RPC_NOTIFICATION_onEncodedSdlPData = "OnEncodedSdlPData";
 	SdlCordova.names.RPC_NOTIFICATION_onDriverDistraction = "OnDriverDistraction";
 	SdlCordova.names.RPC_NOTIFICATION_onAppInterfaceUnregistered = "OnAppInterfaceUnregistered";	
+	SdlCordova.names.RPC_NOTIFICATION_onVehicleData = "OnVehicleData";
+	SdlCordova.names.RPC_NOTIFICATION_onAudioPassThru = "OnAudioPassThru";
 	
 	// Proxy Events
 	SdlCordova.names.PROXY_EVENT_OnProxyClosed = "OnProxyClosed";
@@ -1310,6 +1896,80 @@ SdlCordova.names.correlationID = "correlationID";
 	//Streaming States
 	SdlCordova.names.AUDIO_STREAMING_STATE_AUDIBLE = "AUDIBLE";
 	SdlCordova.names.AUDIO_STREAMING_STATE_NOT_AUDIBLE = "NOT_AUDIBLE";
+	
+	//System action (added)
+	SdlCordova.names.action_DEFAULT_ACTION = "DEFAULT_ACTION";
+	SdlCordova.names.action_STEAL_FOCUS = "STEAL_FOCUS";
+	SdlCordova.names.action_KEEP_CONTEXT = "KEEP_CONTEXT";
+	
+	//SoftButton Type (added)
+	SdlCordova.names.softButtonType_TEXT = "TEXT";
+	SdlCordova.names.softButtonType_IMAGE = "IMAGE";
+	SdlCordova.names.softButtonType_BOTH = "BOTH";
+	
+	//PerformAudioPassThru (added)
+	SdlCordova.names.maxDuration = "maxDuration";
+	SdlCordova.names.audioPassThruDisplayText1 = "audioPassThruDisplayText1";
+	SdlCordova.names.audioPassThruDisplayText2 = "audioPassThruDisplayText2";
+	SdlCordova.names.muteAudio = "muteAudio";
+	SdlCordova.names.samplingRate = "samplingRate";
+	SdlCordova.names.audioType = "audioType";
+	SdlCordova.names.initialPrompt = "initialPrompt";
+	SdlCordova.names.bitsPerSample = "bitsPerSample";
+	
+	//SubscribeVehicleData (added)
+	SdlCordova.names.rpm = "rpm";
+	SdlCordova.names.externalTemperature = "externalTemperature";
+	SdlCordova.names.fuelLevel = "fuelLevel";
+	SdlCordova.names.prndl = "prndl";
+	SdlCordova.names.tirePressure = "tirePressure";
+	SdlCordova.names.engineTorque = "engineTorque";
+	SdlCordova.names.odometer = "odometer";
+	SdlCordova.names.gps = "gps";
+	SdlCordova.names.fuelLevel_State = "fuelLevel_State";
+	SdlCordova.names.instantFuelConsumption = "instantFuelConsumption";
+	SdlCordova.names.beltStatus = "beltStatus";
+	SdlCordova.names.bodyInformation = "bodyInformation";
+	SdlCordova.names.deviceStatus = "deviceStatus";
+	SdlCordova.names.driverBraking = "driverBraking";
+	SdlCordova.names.wiperStatus = "wiperStatus";
+	SdlCordova.names.headLampStatus = "headLampStatus";
+	SdlCordova.names.accPedalPosition = "accPedalPosition";
+	SdlCordova.names.steeringWheelAngle = "steeringWheelAngle";
+	SdlCordova.names.eCallInfo = "eCallInfo";
+	SdlCordova.names.airbagStatus = "airbagStatus";
+	SdlCordova.names.emergencyEvent = "emergencyEvent";
+	SdlCordova.names.clusterModeStatus = "clusterModeStatus";
+	SdlCordova.names.myKey = "myKey";
+	SdlCordova.names.speed = "speed";
+	
+	//GetVehicleData
+	SdlCordova.names.vin = "vin";
+	
+	//ScrollableMessage (added)
+	SdlCordova.names.scrollableMessageBody = "scrollableMessageBody";
+	
+	//ChangeRegistration (added)
+	SdlCordova.names.language = "language";
+    SdlCordova.names.hmiDisplayLanguage = "hmiDisplayLanguage";
+    SdlCordova.names.appName = "appName";
+    SdlCordova.names.ttsName = "ttsName";
+    SdlCordova.names.ngnMediaScreenAppName = "ngnMediaScreenAppName";
+    SdlCordova.names.vrSynonyms = "vrSynonyms";
+	
+	//SetDisplayLayout (added)
+	SdlCordova.names.displayLayout = "displayLayout";
+	
+	//GetDTCs (added)
+	SdlCordova.names.dtcMask = "dtcMask";
+	SdlCordova.names.ecuName = "ecuName";
+	
+	//Slider (added)
+	SdlCordova.names.numTicks = "numTicks";
+	SdlCordova.names.sliderHeader = "sliderHeader";
+	SdlCordova.names.sliderFooter = "sliderFooter";
+	//SdlCordova.names.position = "position";
+	//SdlCordova.names.timeout = "timeout";
 	
 /*************** Default Parameters *****************/
 // Global
