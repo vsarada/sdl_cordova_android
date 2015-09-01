@@ -816,13 +816,11 @@ public class SdlCordova extends CordovaPlugin {
 			callbackContext.error(errorString);
 			return;
 		}
-
 		JSONArray speechCapabilitiesJSONArray = new JSONArray();
 
 		try {
-			// Get the ButtonCapabilities Vector
-			List<SpeechCapabilities> speechCapabilitiesList = sdlProxy
-					.getSpeechCapabilities();
+			// Get the speechCapabilitiesList
+			List<SpeechCapabilities> speechCapabilitiesList = sdlProxy.getSpeechCapabilities(); 
 
 			if (speechCapabilitiesList == null) {
 				String errorString = "No value returned by call: "
@@ -843,7 +841,6 @@ public class SdlCordova extends CordovaPlugin {
 
 			return;
 		}
-
 		callbackContext.success(speechCapabilitiesJSONArray);
 	}
 
@@ -1235,24 +1232,28 @@ public class SdlCordova extends CordovaPlugin {
 		String funcName = rpc.getFunctionName();
 		JSONObject params = null;
 		try {
-			params = rpc.serializeJSON((byte)2);
-			Log.i("Immediate Params Print", params.toString());
+			if(!funcName.equals("OnAudioPassThru")){
+				params = rpc.serializeJSON((byte)2);
+				Log.i("Immediate Params Print", params.toString());
+			}
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}
 		byte[] binaryData = rpc.getBulkData();
 		String msgType = rpc.getMessageType();
 		
-		
-		//encode Binary Data to base 64
-		//String encodedBinaryData = Base64.encode(binaryData);
+		String encodedBinaryData = "";
+		if(binaryData!=null)
+			encodedBinaryData = Base64.encodeToString(binaryData, Base64.DEFAULT);
 		
 		JSONObject obj = new JSONObject();
 		try {
 			obj.put("FunctionName", funcName);
 			obj.put("JSONData", params);
 			obj.put("MessageType", msgType);
-			obj.put("BinaryData", binaryData);
+			//obj.put("BinaryData", binaryData);
+			if(binaryData!=null)
+				obj.put("BinaryData", encodedBinaryData);
 			if(rpc instanceof RPCResponse)
 				obj.put("CorrelationID", ((RPCResponse)rpc).getCorrelationID());
 		} catch (JSONException e) {
@@ -1696,6 +1697,11 @@ public class SdlCordova extends CordovaPlugin {
 		}
 
 		public void onOnAudioPassThru(OnAudioPassThru notification) {
+			/*Log.i("BinaryData", "in onOnAudioPassThru");
+			byte[] binaryData = notification.getBulkData();
+			if(binaryData.length>0)
+				Log.i("BinaryData", binaryData.toString()); //print out binary
+			 //System.exit(0);*/
 			sendRPCCallback(getRPCInfo(notification));
 		}
 
@@ -1833,4 +1839,5 @@ public class SdlCordova extends CordovaPlugin {
 		}
 
 	};
+
 }
