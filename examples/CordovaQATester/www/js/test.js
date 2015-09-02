@@ -9,7 +9,7 @@ var proxyConnected = false;
 var initialized = false; //has opted in
 var nextCorrelationId = 0;
 var hasRun = false;
-var hmiLevel = "NONE"; //SyncProxyAC.Names.HMILevel.NONE;
+var hmiLevel = "NONE"; //SdlCordova.Names.HMILevel.NONE;
 var siphoning = false;
 
 var rpcCount = 0;
@@ -33,6 +33,9 @@ var LogType = {
 /**
  * End Sync Proxy Bindings
  */
+var deviceType = (navigator.userAgent.match(/iPad/i))  == "iPad" ? "iPad" : (navigator.userAgent.match(/iPhone/i))  == "iPhone" ? "iPhone" : (navigator.userAgent.match(/Android/i)) == "Android" ? "Android" : (navigator.userAgent.match(/BlackBerry/i)) == "BlackBerry" ? "BlackBerry" : "null";
+
+console.log(deviceType);
 
 document.addEventListener("deviceready", function(){
 	prependLog("deviceready");
@@ -45,13 +48,13 @@ document.addEventListener("deviceready", function(){
 	/**
  	* Sync Proxy Bindings
  	*/
-	SyncProxyAC.onOnHMIStatus(function(info){
+	SdlCordova.onOnHMIStatus(function(info){
 		prependLog(info);
 		//hmiLevel = info.parameters.hmiLevel;
 		hmiLevel = info.JSONData.hmiLevel;
 		$("#hmiStatus").html(hmiLevel);
 		
-		if(hmiLevel != "NONE"  /*SyncProxyAC.Names.HMILevel.NONE*/ && !initialized){
+		if(hmiLevel != "NONE"  /*SdlCordova.Names.HMILevel.NONE*/ && !initialized){
 			initialize();
 		}
 		
@@ -60,28 +63,32 @@ document.addEventListener("deviceready", function(){
 		}
 	});
 	
-	SyncProxyAC.onProxyFirstAccess(function(){
+	SdlCordova.onProxyFirstAccess(function(){
 		initialize();
 	});
 	
-	SyncProxyAC.onProxyClosed(function(){
-		//SyncProxyAC.onOnHMIStatus({parameters: {hmiLevel: null}});
+	SdlCordova.onProxyClosed(function(){
+		//SdlCordova.onOnHMIStatus({parameters: {hmiLevel: null}});
 		prependLog("Proxy Closed");
 		updateConnectionStatus(false);
 		updateInitializedStatus(false);
 	});
 	
-	SyncProxyAC.onGenericResponse(function(info){
+	SdlCordova.onGenericResponse(function(info){
 		prependLogError("onGenericResponse");
 		prependLogError(info);
 	});
 	
-	SyncProxyAC.onError(function(info){
+	SdlCordova.onError(function(info){
 		prependLogError("onError");
 		prependLog(info);
 	});
-
-
+	
+	// added
+	/*SdlCordova.onOnAudioPassThru(function(info){
+		prependLog("onOnAudioPassThru");
+		prependLog(info);
+	});*/
 }, false);  // end of ondeviceready
 
 function toggleSiphon(status){
@@ -91,14 +98,14 @@ function toggleSiphon(status){
 	
 	if(siphoning){
 		prependLog("Disabling Siphon Server");
-		SyncProxyAC.disableSiphonDebug();
+		SdlCordova.disableSiphonDebug();
 		siphoning = false;
 		sessionStorage.siphoning = false;
 		$("#siphonToggleBtn").html("Enable Siphon");
 		$("#siphonStatus").html("false");
 	}else{
 		prependLog("Enabling Siphon Server");
-		SyncProxyAC.enableSiphonDebug();
+		SdlCordova.enableSiphonDebug();
 		siphoning = true;
 		sessionStorage.siphoning = true;
 		$("#siphonToggleBtn").html("Disable Siphon");
@@ -115,10 +122,10 @@ function initialize(){
 		return;
 	updateInitializedStatus(true);
 	
-	var show = new SyncProxyFactory.Show();
+	var show = new SdlCordovaFactory.Show();
 	show.setCorrelationId(++nextCorrelationId);
 	show.setDisplayText("QA Test", "Select a Test");
-	show.setTextAlignment(SyncProxyAC.names.alignment_center);
+	show.setTextAlignment(SdlCordova.names.alignment_center);
 	show.setMediaClock("     ");
 	show.sendRequest();
 }
@@ -146,7 +153,7 @@ function createProxy(success, error){
 	updateConnectionStatus(false);
 	updateInitializedStatus(false);	
 	
-	SyncProxyAC.createProxy({
+	SdlCordova.createProxy({
 		success: function(json){
 			prependLog("Proxy Created");
 			updateProxyStatus(true);
@@ -167,12 +174,12 @@ function createProxy(success, error){
 			
 			creatingProxy = false;
 		},			
-		appName: "CordovaQATester",
+		appName: "CordovaSyncProxyTester",
 		isMediaApplication: true , 
 		languageDesired: "EN_US",
 		hmiLanguageDesired: "EN_US",
-		//appId : "XXXXXXXX",
-		appId : "XXXXXXXX", //changed the id for debug
+		//appId : "584421907",
+		appId : "2239664629", //changed the id for debug
 		majorVersion : "2",
 		minorVersion : "0"	
 	});
@@ -185,7 +192,7 @@ function prependLogError(text){
 	$("#log").prepend('<div class="red">' + toJSON(text) + "</div>");
 	console.log(text);
 	if(siphoning) {
-	    //SyncProxyAC.siphonLog(text);
+	    //SdlCordova.siphonLog(text);
 	}
 }
 
@@ -194,7 +201,7 @@ function prependLog(text){
 	$("#log").prepend("<div>" + text + "</div>");
 	console.log(text);
 	if(siphoning) {
-	    //SyncProxyAC.siphonLog(text);
+	    //SdlCordova.siphonLog(text);
 	}
 }
 
@@ -233,7 +240,7 @@ function toJSON(o){
 }
 
 function sendRPC(rpc, ignoreResponse){
-	if(!(rpc instanceof SyncProxyFactory.RPCBase)){
+	if(!(rpc instanceof SdlCordovaFactory.RPCBase)){
 		prependLogError("Not a valid RPC");
 		prependLogError(rpc);
 		testManager.addRPCSendError();
@@ -255,7 +262,7 @@ function sendRPC(rpc, ignoreResponse){
 	});
 	
 	if(ignoreResponse !== true){
-		SyncProxyFactory.onCorrelationId(rpc.getCorrelationId(), rpcResponseCheck);
+		SdlCordovaFactory.onCorrelationId(rpc.getCorrelationId(), rpcResponseCheck);
 	}
 	
 	rpc.sendRequest();
@@ -268,8 +275,8 @@ function rpcResponseCheck(info){
 	
 	/*if(info.parameters && info.parameters.success === true){
 		prependLog("RPC Response Success " + info.correlationID);
-	}else if(info.name == SyncProxyAC.Names.Functions.PERFORM_INTERACTION
-			&& info.parameters && info.parameters.resultCode == SyncProxyAC.Names.ResultCode.ABORTED){
+	}else if(info.name == SdlCordova.Names.Functions.PERFORM_INTERACTION
+			&& info.parameters && info.parameters.resultCode == SdlCordova.Names.ResultCode.ABORTED){
 		prependLog("RPC Response Aborted " + info.correlationID);
 	}else{
 		prependLogError("RPC Request Error " + info.correlationID);
@@ -280,7 +287,7 @@ function rpcResponseCheck(info){
 	
 	if(info.JSONData && info.JSONData.success === true){
 		prependLog("RPC Response Success " + info.CorrelationID);
-	}else if(info.FunctionName == SyncProxyAC.names.function_name_performInteraction
+	}else if(info.FunctionName == SdlCordova.names.function_name_performInteraction
 			&& info.JSONData && info.JSONData.resultCode == "ABORTED"){
 		prependLog("RPC Response Aborted " + info.CorrelationID);
 	}else{
@@ -301,11 +308,11 @@ function cleanUp(callback, args){
 	$("#rpcCount, #rpcSendSuccessCount, #rpcSendErrorCount, #rpcResponseCount, #rpcErrorCount").html("0");
 	$("#testStatus").html("");
 	
-	SyncProxyFactory.onCorrelationIdListeners = {};
-	SyncProxyFactory.onChoiceIdListeners = {};
-	SyncProxyFactory.onCommandListeners = {};
-	SyncProxyFactory.buttonEventListeners = {};
-	SyncProxyFactory.buttonPressesListeners = {};
+	SdlCordovaFactory.onCorrelationIdListeners = {};
+	SdlCordovaFactory.onChoiceIdListeners = {};
+	SdlCordovaFactory.onCommandListeners = {};
+	SdlCordovaFactory.buttonEventListeners = {};
+	SdlCordovaFactory.buttonPressesListeners = {};
 	
 	$("#log").html("<div></div>");
 	if(proxyCreated){
@@ -320,7 +327,7 @@ function cleanUp(callback, args){
 			}
 		};
 		
-		SyncProxyAC.getPersistentSyncData({
+		SdlCordova.getPersistentSdlData({
 			success: function(data){
 				//delete commands
 				//prependLog(data.commands.length + " commands");
@@ -328,7 +335,7 @@ function cleanUp(callback, args){
 					var cmdId = data.commands[i].cmdID;
 					console.log("delete cmd id = " + cmdId);
 					if(typeof cmdId == "number" && cmdId >= 0){
-						var deleteCommand = new SyncProxyFactory.DeleteCommand();
+						var deleteCommand = new SdlCordovaFactory.DeleteCommand();
 						deleteCommand.setSuccess(function(){
 							sent++;
 						});
@@ -336,7 +343,7 @@ function cleanUp(callback, args){
 						deleteCommand.setCmdId(cmdId);
 						deleteCommand.sendRequest();
 						
-						SyncProxyFactory.onCorrelationId(deleteCommand.getCorrelationId(), waitCheck);
+						SdlCordovaFactory.onCorrelationId(deleteCommand.getCorrelationId(), waitCheck);
 					}else{
 						console.log("Invalid Command ID");
 					}
@@ -348,14 +355,14 @@ function cleanUp(callback, args){
 					var menuId = data.subMenus[i].menuID;
 					console.log("delete sub menu id = " + menuId);
 					if(typeof menuId == "number" && menuId >= 0){
-						var deleteMenu = new SyncProxyFactory.DeleteSubMenu();
+						var deleteMenu = new SdlCordovaFactory.DeleteSubMenu();
 						deleteMenu.setCorrelationId(++nextCorrelationId);
 						deleteMenu.setSuccess(function(){
 							sent++;
 						});
 						deleteMenu.setMenuId(menuId);
 						deleteMenu.sendRequest();
-						SyncProxyFactory.onCorrelationId(deleteMenu.getCorrelationId(), waitCheck);
+						SdlCordovaFactory.onCorrelationId(deleteMenu.getCorrelationId(), waitCheck);
 					}else{
 						console.log("Invalid Sub Menu ID");
 					}
@@ -367,14 +374,14 @@ function cleanUp(callback, args){
 					var id = data.choiceSets[i].interactionChoiceSetID;
 					console.log("delete choice set id = " + id);
 					if(typeof id == "number" && id >= 0){
-						var deleteChoiceSet = new SyncProxyFactory.DeleteInteractionChoiceSet();
+						var deleteChoiceSet = new SdlCordovaFactory.DeleteInteractionChoiceSet();
 						deleteChoiceSet.setSuccess(function(){
 							sent++;
 						});
 						deleteChoiceSet.setCorrelationId(++nextCorrelationId);
 						deleteChoiceSet.setInteractionChoiceSetId(id);
 						deleteChoiceSet.sendRequest();
-						SyncProxyFactory.onCorrelationId(deleteChoiceSet.getCorrelationId(), waitCheck);
+						SdlCordovaFactory.onCorrelationId(deleteChoiceSet.getCorrelationId(), waitCheck);
 					}else{
 						console.log("Invalid Interaction Choice Set ID");
 					}				
@@ -386,14 +393,14 @@ function cleanUp(callback, args){
 					var btnName = data.buttonSubscriptions[i];
 					prependLog("unsubscribe button  = " + btnName);
 					if(typeof btnName == "string"){
-						var unsubscribeButton = new SyncProxyFactory.UnsubscribeButton();
+						var unsubscribeButton = new SdlCordovaFactory.UnsubscribeButton();
 						unsubscribeButton.setSuccess(function(){
 							sent++;
 						});
 						unsubscribeButton.setCorrelationId(++nextCorrelationId);
 						unsubscribeButton.setButtonName(btnName);
 						unsubscribeButton.sendRequest();
-						SyncProxyFactory.onCorrelationId(unsubscribeButton.getCorrelationId(), waitCheck);
+						SdlCordovaFactory.onCorrelationId(unsubscribeButton.getCorrelationId(), waitCheck);
 					}else{
 						console.log("Invalid button name");
 					}
@@ -405,7 +412,7 @@ function cleanUp(callback, args){
 				}
 			},
 			error: function(e){
-				prependLog("getPersistentSyncData failed! Could not clean up! " + e);
+				prependLog("getPersistentSdlData failed! Could not clean up! " + e);
 			}
 		});
 	}else{
@@ -443,7 +450,7 @@ $(document).ready(function(){
 });
 
 function disposeProxy(success, error){
-	SyncProxyAC.dispose({
+	SdlCordova.dispose({
 		success: function(){
 			prependLog("Proxy Disposed");
 			updateProxyStatus(false);
@@ -468,7 +475,7 @@ function disposeProxy(success, error){
 }
 
 function resetProxy(success, error){
-	SyncProxyAC.reset({
+	SdlCordova.reset({
 		success: function(){
 			prependLog("Proxy Reset");
 			updateProxyStatus(true);
@@ -524,7 +531,7 @@ function createLargeChoiceSet(){
 	
 	for(var i = 0; i < 100; i++){
 		var id = choiceId++;
-		choiceSet.push(new SyncProxyAC.Choice(id, "choice " + id, ["choice " + id]));
+		choiceSet.push(new SdlCordova.Choice(id, "choice " + id, ["choice " + id]));
 	}
 	
 	return choiceSet;
