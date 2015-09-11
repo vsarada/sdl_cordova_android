@@ -1159,7 +1159,7 @@ public class SdlCordova extends CordovaPlugin {
 					else if(functionName.equals(Names.PerformAudioPassThru)){
 						mySampleRate = getSampleRate((String)parameters.get("samplingRate"));
 						myBitsPerSample = getBitsPerSample((String)parameters.get("bitsPerSample"));    
-						waveFilename = (String)parameters.get("filename");
+						//waveFilename = (String)parameters.get("filename");
 					}
 				}
 				
