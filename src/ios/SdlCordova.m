@@ -193,6 +193,7 @@ static NSString* proxyCommandCallbackId;
       // [SDLDebugTool logInfo:[NSString stringWithFormat:@"End of 2nd try block of  Class: %@, Method: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd)]];
 }
 
+
 -(void)registerNewCallbackContext:(CDVInvokedUrlCommand*)command{
     
     if (!self.commandDelegate) {
@@ -336,6 +337,48 @@ static NSString* proxyCommandCallbackId;
         }
     }
     
+    
+    //Added by vivek .. putfile code...
+    //Check for request and requestName. extract, decode and assign the file to bulkData.
+  
+if( [rpcRequest.name isEqualToString:@"PutFile"])
+{
+       
+      // NSLog(@"Inside Put File menu");
+     //  NSString *funcName =  rpcRequest.getFunctionName;
+      // NSData* binaryData =  rpcRequest.bulkData;
+       NSString *msgType =   rpcRequest.messageType;
+       
+   if ( [msgType isEqualToString:@"request"])
+   {
+        //  NSLog(@"Inside request!. going in value param and buld data values");
+       NSDictionary* params  = [[rpcRequest serializeAsDictionary:2] copy];
+       
+       NSString* data1 = [params objectForKey:(@"fileData")] ;
+       NSArray *data = [data1  componentsSeparatedByString:@","];
+       int data_count =  (int)[data count];
+      
+  //  for (id x in data) NSLog(@"%@",x);
+       
+       if (data_count > 1) {
+           NSString *base64String =  data[1];
+           NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:base64String options:0];
+       //    NSString *decodedString = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
+
+           rpcRequest.bulkData = decodedData;
+           //NSLog(@"BulkData values have been set as follows %@",  rpcRequest.bulkData);
+       }
+       
+       else { NSLog(@"No file data Found!");
+       }
+   }
+} //end of request..
+   
+    
+
+    //TODO: if happy path fails. && rpcRequest == SDLPutFileRequest, print description to include bulkData size
+    
+ 
     [self.sdlProxy sendRPCRequest:rpcRequest];
     
     if (self.commandDelegate) {
@@ -590,6 +633,10 @@ static NSString* proxyCommandCallbackId;
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[NSString stringWithFormat:@"%@ currently unsupported.", NSStringFromSelector(_cmd)]];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
+//Added byvivek ..
+
+//-(void)getSdlMsgVersion:(CDVInvokedUrlCommand*)command;
+// vivek..
 
 -(void)getSyncMsgVersion:(CDVInvokedUrlCommand*)command{
 
@@ -720,7 +767,7 @@ static NSString* proxyCommandCallbackId;
     
     // JSONObject params = null;
     //TODO: Should this be a hardcoded 2?
-    NSInteger version = [self.raiResponse.syncMsgVersion.majorVersion integerValue];
+   // NSInteger version = [self.raiResponse.syncMsgVersion.majorVersion integerValue];
    //[SDLDebugTool logInfo:[NSString stringWithFormat:@" vivek check - version = %li", (long)version]];
    // NSDictionary* params  = [[rpc serializeAsDictionary:version] copy]; //rpc.serializeJSON((byte)2);
     NSDictionary* params  = [[rpc serializeAsDictionary:2] copy];
@@ -802,12 +849,11 @@ static NSString* proxyCommandCallbackId;
 
     
     */
-    
     //[SDLDebugTool logInfo:[NSString stringWithFormat:@"sendPluginResult - proxyCallbackDelegate=%@, callbackId=%@", proxyCallbackDelegate, proxyCommandCallbackId]];
     
     
     //TODO: This is not calling into JS. Check result & info objects for completeness.
-    [proxyCallbackDelegate sendPluginResult:result callbackId:proxyCommandCallbackId];
+      [proxyCallbackDelegate sendPluginResult:result callbackId:proxyCommandCallbackId];
     
     
     
@@ -1044,6 +1090,7 @@ static NSString* proxyCommandCallbackId;
 }
 
 -(void) onGenericResponse:(SDLGenericResponse*) response{
+    // print all details...vivek
     [self sendRPCCallback:[self jsonFromRPC:response]];
 }
 
@@ -1111,5 +1158,160 @@ static NSString* proxyCommandCallbackId;
     
     return [proxyEventJSON copy];
 }
+
+
+// Added by vivek.... after speaking with kevin .. missing methods ...
+
+// Not sure what to do ...
+
+/* -(void) onProxyClosed{
+
+
+
+    (NSString*)message = [NSString "a"];
+[onProxyClosedWithMessage:message];
+  //  [self resetLifecycleVariables];
+   // [self sendRPCCallback:[self createProxyEvent:[self createProxyEvent:SDLCDVProxyEventOnProxyClosedKey withInfo:message withError:nil]]];
+}
+
+-(void) onErrorWithMessage:(NSString*)message withException:(NSException*) e{
+    [self sendRPCCallback:[self createProxyEvent:[self createProxyEvent:SDLCDVProxyEventOnErrorKey withInfo:message withError:nil]]];
+}
+*/
+
+//-(void) onProxyOpened;
+// -(void) onError:(NSException*) e;
+
+-(void) onChangeRegistrationResponse:(SDLChangeRegistrationResponse*) response
+    {[self sendRPCCallback:[self jsonFromRPC:response]];
+};
+
+-(void) onDeleteFileResponse:(SDLDeleteFileResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+
+
+-(void) onDiagnosticMessageResponse:(SDLDiagnosticMessageResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+
+-(void) onEndAudioPassThruResponse:(SDLEndAudioPassThruResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+
+
+-(void) onGetDTCsResponse:(SDLGetDTCsResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+-(void) onGetVehicleDataResponse:(SDLGetVehicleDataResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+
+-(void) onListFilesResponse:(SDLListFilesResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+-(void) onOnAppInterfaceUnregistered:(SDLOnAppInterfaceUnregistered*) notification{
+       [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onOnAudioPassThru:(SDLOnAudioPassThru*) notification{
+       [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+
+-(void) onOnHashChange:(SDLOnHashChange*) notification{
+       [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onOnLanguageChange:(SDLOnLanguageChange*) notification{
+   [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onOnLockScreenNotification:(SDLLockScreenStatus*) notification{
+   [self sendRPCCallback:[self jsonFromRPC:(SDLRPCMessage *)notification]];
+}
+
+-(void) onOnPermissionsChange:(SDLOnPermissionsChange*) notification{
+      [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onOnSyncPData:(SDLOnSyncPData*) notification{
+    [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onOnSystemRequest:(SDLOnSystemRequest*) notification{
+   [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onOnTouchEvent:(SDLOnTouchEvent*) notification{
+       [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onOnVehicleData:(SDLOnVehicleData*) notification{
+       [self sendRPCCallback:[self jsonFromRPC:notification]];
+}
+
+-(void) onPerformAudioPassThruResponse:(SDLPerformAudioPassThruResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+
+-(void) onPutFileResponse:(SDLPutFileResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+-(void) onReadDIDResponse:(SDLReadDIDResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+-(void) onScrollableMessageResponse:(SDLScrollableMessageResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+-(void) onSetAppIconResponse:(SDLSetAppIconResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+-(void) onSetDisplayLayoutResponse:(SDLSetDisplayLayoutResponse*) response{
+    [self sendRPCCallback:[self jsonFromRPC:response]];
+}
+
+
+
+-(void) onShowConstantTBTResponse:(SDLShowConstantTBTResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]];}
+-(void) onSliderResponse:(SDLSliderResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]];}
+
+-(void) onSubscribeVehicleDataResponse:(SDLSubscribeVehicleDataResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]];}
+-(void) onSyncPDataResponse:(SDLSyncPDataResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]];}
+-(void) onUpdateTurnListResponse:(SDLUpdateTurnListResponse*) response {[self sendRPCCallback:[self jsonFromRPC:response]];}
+
+-(void) onUnregisterAppInterfaceResponse:(SDLUnregisterAppInterfaceResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]];}
+-(void) onUnsubscribeVehicleDataResponse:(SDLUnsubscribeVehicleDataResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]];}
+
+
+
+
+
+//-(void) onShowResponse:(SDLShowResponse*) response;
+//-(void) onRegisterAppInterfaceResponse:(SDLRegisterAppInterfaceResponse*) response;
+//-(void) onResetGlobalPropertiesResponse:(SDLResetGlobalPropertiesResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]]};
+//-(void) onSetGlobalPropertiesResponse:(SDLSetGlobalPropertiesResponse*) response;
+//-(void) onPerformInteractionResponse:(SDLPerformInteractionResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]]};
+//-(void) onDeleteInteractionChoiceSetResponse:(SDLDeleteInteractionChoiceSetResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]]};
+//-(void) onOnButtonEvent:(SDLOnButtonEvent*) notification{void}
+//-(void) onEncodedSyncPDataResponse:(SDLEncodedSyncPDataResponse*) response{[self sendRPCCallback:[self jsonFromRPC:response]]};
+
+
+
+//-(void) onSpeakResponse:(SDLSpeakResponse*) response;
+//-(void) onSubscribeButtonResponse:(SDLSubscribeButtonResponse*) response;
+ 
+//-(void) onUnsubscribeButtonResponse:(SDLUnsubscribeButtonResponse*) response;
+
+
 
 @end
