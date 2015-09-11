@@ -951,6 +951,7 @@ function PerformAudioPassThru(){
     this.audioType = null;
     this.initialPrompt = null;
     this.bitsPerSample = null;
+	this.filename = null; //for storing wav file
 	
 	this.setMaxDuration = function(maxDuration){
 		this.maxDuration = maxDuration;
@@ -992,6 +993,10 @@ function PerformAudioPassThru(){
 		this.bitsPerSample = bitsPerSample;
 	};
 	
+	this.setFilename = function(filename){
+		this.filename = filename;
+	};
+	
 	this.getMaxDuration = function(){
 		return this.maxDuration;
 	};
@@ -1022,6 +1027,10 @@ function PerformAudioPassThru(){
 	
 	this.getBitsPerSample = function(){
 		return this.bitsPerSample;
+	};
+	
+	this.getFilename = function(){
+		return this.filename;
 	};
 }
 PerformAudioPassThru.prototype = Object.create(RPCBase.prototype);
