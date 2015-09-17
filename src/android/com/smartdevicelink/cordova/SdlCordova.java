@@ -4,6 +4,13 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.util.List;
 import java.util.Arrays;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 
@@ -11,6 +18,13 @@ import java.io.UnsupportedEncodingException;
 //import org.apache.cordova.api.CallbackContext;
 //import org.apache.cordova.api.CordovaPlugin;
 //import org.apache.cordova.api.PluginResult;
+
+
+
+
+
+
+
 
 //Post Cordova 3.0 Imports
 import org.apache.cordova.CallbackContext;
@@ -126,6 +140,19 @@ import com.smartdevicelink.util.DebugTool;
 
 
 
+
+
+
+
+
+// added for performaudiopassthru
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+
+import android.widget.Toast;
+import android.os.Environment;
+
+
 public class SdlCordova extends CordovaPlugin {
 
 	private static final String logTag = SdlCordova.class.getSimpleName();
@@ -141,6 +168,21 @@ public class SdlCordova extends CordovaPlugin {
 
 	// Pending Proxies
 	private static SparseArray<RPCRequest> pendingRPCRequests = new SparseArray<RPCRequest>();
+	
+	//for PerformAudioPassThru
+	private static int mySampleRate = 0;
+    private static int myBitsPerSample = 0;    
+    private static int iByteCount = 0;
+	private boolean bSaveWave = false; //may not need
+	private static String waveFilename = null;
+	private static OutputStream audioPassThruOutStream = null;
+	private static final String AUDIOPASSTHRU_OUTPUT_FILE_PCM = "audiopassthru.pcm";
+	private static final String AUDIOPASSTHRU_OUTPUT_FILE_WAV = "audiopassthru.wav";
+	private static final int WAV = 0;
+	private static final int PCM = 1;
+	
+	// for PutFile
+	//private byte[] code = null;
 
 	/**
 	 * Executes the request.
@@ -1101,17 +1143,24 @@ public class SdlCordova extends CordovaPlugin {
 			try {
 				Hashtable<String, Object> hash = JsonRPCMarshaller
 						.deserializeJSONObject(rpcRequestJSON);
-						
-				//added for PutFile
+				
 				byte[] code = null;
 				Hashtable<String, Object> function = (Hashtable<String, Object>) hash.get("request"); //name, correlationId, parameters
-				if((String.valueOf(function.get("name"))).equals(Names.PutFile)){
-					Hashtable<String, Object> parameters = (Hashtable<String, Object>)function.get("parameters"); //fileType, syncFileName, fileData
-					String temp = (String)parameters.get("fileData");
-					// take out header
-					temp = temp.substring(temp.indexOf(",")+1);
-					code = Base64.decode(temp, Base64.DEFAULT);
-					//parameters.put("bulkData", Base64.decode(temp, Base64.DEFAULT));
+				String functionName = String.valueOf(function.get("name"));
+				if(functionName.equals(Names.PutFile) || functionName.equals(Names.PerformAudioPassThru)){
+					Hashtable<String, Object> parameters = (Hashtable<String, Object>)function.get("parameters"); 
+					if(functionName.equals(Names.PutFile)){//PutFile -- fileType, syncFileName, fileData
+						String temp = (String)parameters.get("fileData");
+						// take out header
+						temp = temp.substring(temp.indexOf(",")+1);
+						code = Base64.decode(temp, Base64.DEFAULT);
+						//parameters.put("bulkData", Base64.decode(temp, Base64.DEFAULT));
+					}
+					else if(functionName.equals(Names.PerformAudioPassThru)){
+						mySampleRate = getSampleRate((String)parameters.get("samplingRate"));
+						myBitsPerSample = getBitsPerSample((String)parameters.get("bitsPerSample"));    
+						//waveFilename = (String)parameters.get("filename");
+					}
 				}
 				
 				rpcRequest = new RPCRequest(hash);
@@ -1681,6 +1730,7 @@ public class SdlCordova extends CordovaPlugin {
 		}
 
 		public void onEndAudioPassThruResponse(EndAudioPassThruResponse response) {
+			//onPerformAudioPassThruResponse(response);
 			sendRPCCallback(getRPCInfo(response));
 		}
 
@@ -1697,11 +1747,35 @@ public class SdlCordova extends CordovaPlugin {
 		}
 
 		public void onOnAudioPassThru(OnAudioPassThru notification) {
-			/*Log.i("BinaryData", "in onOnAudioPassThru");
-			byte[] binaryData = notification.getBulkData();
-			if(binaryData.length>0)
-				Log.i("BinaryData", binaryData.toString()); //print out binary
-			 //System.exit(0);*/
+			byte[] aptData = notification.getBulkData();
+			
+			// get data length
+			if (aptData == null) {
+				Log.w(logTag, "onAudioPassThru aptData is null");
+				return;
+			}
+			Log.i(logTag, "data len " + aptData.length);
+			iByteCount = iByteCount + aptData.length;
+			
+			// write to file
+			File outFile = audioPassThruOutputFile(PCM);
+			try {
+				if (audioPassThruOutStream == null) {
+					audioPassThruOutStream = new BufferedOutputStream(
+							new FileOutputStream(outFile, false));
+				}
+				audioPassThruOutStream.write(aptData);
+				audioPassThruOutStream.flush();
+			} catch (FileNotFoundException e) {
+				logToConsoleAndUI(
+						"Output file "
+								+ (outFile != null ? outFile.toString()
+										: "'unknown'")
+								+ " can't be opened for writing", e);
+			} catch (IOException e) {
+				logToConsoleAndUI("Can't write to output file", e);
+			}
+			
 			sendRPCCallback(getRPCInfo(notification));
 		}
 
@@ -1719,6 +1793,22 @@ public class SdlCordova extends CordovaPlugin {
 
 		public void onPerformAudioPassThruResponse(
 				PerformAudioPassThruResponse response) {
+			closeAudioPassThruStream();
+			//closeAudioPassThruMediaPlayer();
+					
+			if (response.getSuccess() == true)
+			{
+				saveAsWav();
+			}		
+			else{
+				File outFile = audioPassThruOutputFile(PCM);
+				if ((outFile != null) && outFile.exists()) {
+					if (!outFile.delete()) {
+						logToConsoleAndUI("Failed to delete output file", null);
+					}
+				}
+			}	
+			
 			sendRPCCallback(getRPCInfo(response));
 		}
 
@@ -1839,5 +1929,155 @@ public class SdlCordova extends CordovaPlugin {
 		}
 
 	};
+	
+	// PerformAudioPassThru
+	public static int getSampleRate(String mySample)
+	{
+		int iReturn = 0;    	
+		switch (mySample) 
+		{
+			case "8KHZ": iReturn = 8000;
+				break;
+			case "16KHZ":  iReturn = 16000;
+				break;
+			case "22KHZ":  iReturn = 22050;
+				break;
+			case "44KHZ":  iReturn = 44100;        		
+				break;                             
+		}    	
+		return iReturn;
+	}
+			
+			
+	public static int getBitsPerSample(String myBitsPerSample)
+	{
+		int iReturn = 0;    	
+		switch (myBitsPerSample) 
+		{    
+			case "8_BIT": iReturn = 8;
+				break;
+			case "16_BIT":  iReturn = 16;
+					break;
+		}    	
+		return iReturn;    	
+	}
+	
+	private static File audioPassThruOutputFile(int iTypePar) {
+		
+		String sFileType = "";
+		if (iTypePar == WAV)
+		{
+			sFileType = AUDIOPASSTHRU_OUTPUT_FILE_WAV;
+		}
+		else if (iTypePar == PCM)
+		{
+			sFileType = AUDIOPASSTHRU_OUTPUT_FILE_PCM;
+		}
+		
+		File baseDir = isExtStorageWritable() ? Environment
+				.getExternalStorageDirectory() : null;
+		File outFile = new File(baseDir, sFileType);
+		return outFile;
+	}
 
+	private static boolean isExtStorageWritable() {
+		String state = Environment.getExternalStorageState();
+		return Environment.MEDIA_MOUNTED.equals(state);
+	}
+	
+	private static void logToConsoleAndUI(String msg, Throwable thr) {
+		Log.d(logTag, msg, thr);
+		//Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+	}
+	
+	private static void closeAudioPassThruStream() {
+		if (audioPassThruOutStream != null) {
+			Log.d(logTag, "closing audioPassThruOutStream");
+			try {
+				audioPassThruOutStream.flush();
+				audioPassThruOutStream.close();
+			} catch (IOException e) {
+				Log.w(logTag, "Can't close output file", e);
+			}
+			audioPassThruOutStream = null;
+		}
+	}
+	
+	private static byte[] WriteWaveFileHeader(DataOutputStream out, long totalAudioLen,
+            						  long totalDataLen, long longSampleRate, int channels, long byteRate) 
+	{     
+		byte[] header = new byte[44];      
+		header[0] = 'R';  // RIFF/WAVE header
+		header[1] = 'I';
+		header[2] = 'F';
+		header[3] = 'F';
+		header[4] = (byte) (totalDataLen & 0xff);
+		header[5] = (byte) ((totalDataLen >> 8) & 0xff);
+		header[6] = (byte) ((totalDataLen >> 16) & 0xff);
+		header[7] = (byte) ((totalDataLen >> 24) & 0xff);
+		header[8] = 'W';
+		header[9] = 'A';
+		header[10] = 'V';
+		header[11] = 'E';
+		header[12] = 'f';  // 'fmt ' chunk
+		header[13] = 'm';
+		header[14] = 't';
+		header[15] = ' ';
+		header[16] = 16;  // 4 bytes: size of 'fmt ' chunk
+		header[17] = 0;
+		header[18] = 0;
+		header[19] = 0;
+		header[20] = 1;  // format = 1
+		header[21] = 0;
+		header[22] = (byte) channels;
+		header[23] = 0;
+		header[24] = (byte) (longSampleRate & 0xff);
+		header[25] = (byte) ((longSampleRate >> 8) & 0xff);
+		header[26] = (byte) ((longSampleRate >> 16) & 0xff);
+		header[27] = (byte) ((longSampleRate >> 24) & 0xff);
+		header[28] = (byte) (byteRate & 0xff);
+		header[29] = (byte) ((byteRate >> 8) & 0xff);
+		header[30] = (byte) ((byteRate >> 16) & 0xff);
+		header[31] = (byte) ((byteRate >> 24) & 0xff);
+		header[32] = (byte) (channels * myBitsPerSample / 8);  // block align
+		header[33] = 0;
+		header[34] = (byte) myBitsPerSample;  // bits per sample
+		header[35] = 0;
+		header[36] = 'd';
+		header[37] = 'a';
+		header[38] = 't';
+		header[39] = 'a';
+		header[40] = (byte) (totalAudioLen & 0xff);
+		header[41] = (byte) ((totalAudioLen >> 8) & 0xff);
+		header[42] = (byte) ((totalAudioLen >> 16) & 0xff);
+		header[43] = (byte) ((totalAudioLen >> 24) & 0xff);    
+		return header;		      
+	}
+	
+	private static boolean saveAsWav(){
+		try
+        {                                         
+			byte[] myData;        
+            DataOutputStream outFile  = new DataOutputStream(new FileOutputStream(audioPassThruOutputFile(WAV)));                                     
+            long totalAudioLen = iByteCount;
+            long totalDataLen = totalAudioLen + 36;
+            long longSampleRate = mySampleRate;
+            int channels = 1;
+            long byteRate =  mySampleRate * channels * myBitsPerSample/8;
+            byte[] header = WriteWaveFileHeader(outFile, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);                                    
+            outFile.write(header, 0, 44);
+            DataInputStream inFile = new DataInputStream(new FileInputStream(audioPassThruOutputFile(PCM)));
+            myData = new byte[iByteCount];
+            inFile.read(myData);                                        
+            outFile.write(myData);                    
+            inFile.close();
+            outFile.close();
+        }
+        catch(Exception e)
+        {
+        	e.printStackTrace();
+            return false;
+        }
+        return true;
+    }    
 }

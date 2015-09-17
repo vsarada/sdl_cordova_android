@@ -116,8 +116,8 @@ var SdlCordova = {
        }
        //
 
-		cordova.exec(opts.success, opts.fail, "SdlCordova", SdlCordova.names.ACTION_CREATE_PROXY, [params]);
-		//TODO cordova.exec(this.iProxyListenerCallback, opts.fail, "SdlCordova", SdlCordova.names.ACTION_CREATE_PROXY, [params]);
+		//cordova.exec(opts.success, opts.fail, "SdlCordova", SdlCordova.names.ACTION_CREATE_PROXY, [params]);
+		cordova.exec(this.iProxyListenerCallback, opts.fail, "SdlCordova", SdlCordova.names.ACTION_CREATE_PROXY, [params]);
 	},
 	
 	checkAndUpdateProxyCallback: function(opts){
@@ -551,6 +551,9 @@ var SdlCordova = {
 		}
 		if(opts.bitsPerSample){
 			rpcRequestParams[SdlCordova.names.bitsPerSample] = opts.bitsPerSample;
+		}
+		if(opts.filename){
+			rpcRequestParams[SdlCordova.names.filename] = opts.filename;
 		}
 		
 		// Build the request
@@ -1916,6 +1919,7 @@ SdlCordova.names.correlationID = "correlationID";
 	SdlCordova.names.audioType = "audioType";
 	SdlCordova.names.initialPrompt = "initialPrompt";
 	SdlCordova.names.bitsPerSample = "bitsPerSample";
+	SdlCordova.names.filename = "filename";
 	
 	//SubscribeVehicleData (added)
 	SdlCordova.names.rpm = "rpm";
